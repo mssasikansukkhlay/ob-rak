@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#73a9ad" />
   <meta name="description" content="ห้องโอบรัก พื้นที่ดูแลสุขภาพใจและจองรับคำปรึกษาสำหรับนักศึกษาพยาบาล มทร.ธัญบุรี" />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/rmutt-nursing-logo.png" />
   <link rel="stylesheet" href="/src/styles.css" />
   <title>ห้องโอบรัก (Ob Rak)</title>
 </head>
@@ -14,9 +15,7 @@
 
   <header class="site-header">
     <a class="brand" href="#home" aria-label="ห้องโอบรัก หน้าแรก">
-      <span class="brand-mark">
-  <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี">
-</span>
+      <span class="brand-mark"><img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" /></span>
       <span class="brand-copy">
         <strong>ห้องโอบรัก</strong>
         <small>Ob Rak Mental Health Space</small>
@@ -460,9 +459,7 @@
 
   <footer class="site-footer">
     <div>
-      <a class="brand footer-brand" href="#home"><span class="brand-mark">
-  <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี">
-</span><span><strong>ห้องโอบรัก</strong><small>Ob Rak</small></span></a>
+      <a class="brand footer-brand" href="#home"><span class="brand-mark"><img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" /></span><span><strong>ห้องโอบรัก</strong><small>Ob Rak</small></span></a>
       <p>ต้นแบบระบบส่งเสริมสุขภาพใจสำหรับนักศึกษาพยาบาล มทร.ธัญบุรี</p>
     </div>
     <div>
@@ -476,6 +473,114 @@
       <a href="#breathing">ห้องพักใจ</a>
     </div>
   </footer>
+
+
+  <!-- แบบประเมินความเครียด SPST-20: เปิดเป็นหน้าซ้อนในเว็บเดิม ไม่เปลี่ยน URL -->
+  <dialog class="spst-dialog" id="stressAssessmentDialog" aria-labelledby="spstDialogTitle">
+    <div class="spst-dialog-shell">
+      <header class="spst-dialog-header">
+        <a class="spst-dialog-brand" href="#home" aria-label="ห้องโอบรัก">
+          <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" />
+          <span>
+            <strong>ห้องโอบรัก</strong>
+            <small>Ob Rak Mental Health Space</small>
+          </span>
+        </a>
+
+        <button class="spst-close-button" id="spstCloseButton" type="button" aria-label="ปิดแบบประเมิน">
+          ← กลับไปหน้าแบบประเมิน
+        </button>
+      </header>
+
+      <main class="spst-dialog-content">
+        <aside class="spst-info-card">
+          <p class="spst-kicker">แบบประเมินสุขภาพใจ</p>
+          <h2 id="spstDialogTitle">แบบวัดความเครียด กรมสุขภาพจิต</h2>
+          <span class="spst-badge">SPST-20</span>
+
+          <p>
+            ในระยะ 6 เดือนที่ผ่านมา มีเหตุการณ์ในข้อใดเกิดขึ้นกับคุณบ้าง
+            และคุณมีความรู้สึกต่อเหตุการณ์นั้นอย่างไร
+          </p>
+
+          <div class="spst-help-box">
+            <strong>วิธีตอบ</strong>
+            <p>
+              เลือกระดับความเครียดที่ตรงกับความรู้สึกมากที่สุด
+              หากเหตุการณ์นั้นไม่เกิดขึ้น ให้เลือก 0 คะแนน
+            </p>
+          </div>
+
+          <details class="spst-score-guide">
+            <summary>ดูความหมายของคะแนน</summary>
+            <ul>
+              <li><span>0</span> เหตุการณ์นี้ไม่เกิดขึ้น</li>
+              <li><span>1</span> ไม่รู้สึกเครียด</li>
+              <li><span>2</span> รู้สึกเครียดเล็กน้อย</li>
+              <li><span>3</span> รู้สึกเครียดปานกลาง</li>
+              <li><span>4</span> รู้สึกเครียดมาก</li>
+              <li><span>5</span> รู้สึกเครียดมากที่สุด</li>
+            </ul>
+          </details>
+
+          <p class="spst-disclaimer">
+            ผลประเมินเป็นการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัยโรค
+          </p>
+        </aside>
+
+        <section class="spst-assessment-card">
+          <div id="spstQuestionView">
+            <div class="spst-progress-row">
+              <strong id="spstProgressText">ข้อที่ 1 จาก 20</strong>
+              <span id="spstAnsweredText">ตอบแล้ว 0 ข้อ</span>
+            </div>
+
+            <div class="spst-progress-track" aria-hidden="true">
+              <div class="spst-progress-fill" id="spstProgressFill"></div>
+            </div>
+
+            <article class="spst-question-box">
+              <span class="spst-question-chip" id="spstQuestionNumber">ข้อ 1</span>
+              <h3 id="spstQuestionText">กลัวทำงานผิดพลาด</h3>
+              <div class="spst-answer-list" id="spstAnswerList"></div>
+            </article>
+
+            <div class="spst-nav-row">
+              <button class="spst-action spst-action-light" id="spstPreviousButton" type="button">
+                ก่อนหน้า
+              </button>
+              <button class="spst-action spst-action-primary" id="spstNextButton" type="button">
+                ถัดไป
+              </button>
+            </div>
+          </div>
+
+          <div class="spst-result-view hidden" id="spstResultView">
+            <div class="spst-result-symbol">♡</div>
+            <p class="spst-kicker">ผลประเมินของคุณ</p>
+            <h3 id="spstResultLevel">ระดับความเครียด</h3>
+            <p class="spst-total-score">
+              คะแนนรวม <strong id="spstResultScore">0</strong><span>/100</span>
+            </p>
+            <p class="spst-result-advice" id="spstResultAdvice"></p>
+            <p class="spst-save-message" id="spstSaveMessage" role="status"></p>
+
+            <div class="spst-result-actions">
+              <button class="spst-action spst-action-primary" id="spstBookingButton" type="button">
+                จองเวลาพูดคุย
+              </button>
+              <button class="spst-action spst-action-light" id="spstBreathingButton" type="button">
+                ไปที่ห้องพักใจ
+              </button>
+              <button class="spst-action spst-action-light" id="spstRetakeButton" type="button">
+                ทำแบบประเมินใหม่
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </dialog>
 
   <dialog class="modal" id="loginDialog">
     <form method="dialog" class="modal-shell" id="loginForm">

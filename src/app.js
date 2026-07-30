@@ -75,6 +75,25 @@ const elements = {
   assessmentResult: $('#assessmentResult'),
   assessmentHistory: $('#assessmentHistory'),
   refreshAssessmentButton: $('#refreshAssessmentButton'),
+  stressAssessmentDialog: $('#stressAssessmentDialog'),
+  spstCloseButton: $('#spstCloseButton'),
+  spstQuestionView: $('#spstQuestionView'),
+  spstResultView: $('#spstResultView'),
+  spstProgressText: $('#spstProgressText'),
+  spstAnsweredText: $('#spstAnsweredText'),
+  spstProgressFill: $('#spstProgressFill'),
+  spstQuestionNumber: $('#spstQuestionNumber'),
+  spstQuestionText: $('#spstQuestionText'),
+  spstAnswerList: $('#spstAnswerList'),
+  spstPreviousButton: $('#spstPreviousButton'),
+  spstNextButton: $('#spstNextButton'),
+  spstResultLevel: $('#spstResultLevel'),
+  spstResultScore: $('#spstResultScore'),
+  spstResultAdvice: $('#spstResultAdvice'),
+  spstSaveMessage: $('#spstSaveMessage'),
+  spstBookingButton: $('#spstBookingButton'),
+  spstBreathingButton: $('#spstBreathingButton'),
+  spstRetakeButton: $('#spstRetakeButton'),
   counselorList: $('#counselorList'),
   bookingForm: $('#bookingForm'),
   bookingTopic: $('#bookingTopic'),
@@ -115,8 +134,8 @@ const elements = {
 const assessments = {
   stress: {
     icon: '☁️',
-    title: 'เช็กความเครียด',
-    description: 'สำรวจความตึงเครียดและผลกระทบต่อชีวิตในช่วง 7 วันที่ผ่านมา',
+    title: 'แบบวัดความเครียด SPST-20',
+    description: 'ประเมินระดับความเครียดจากเหตุการณ์ต่าง ๆ ในช่วง 6 เดือนที่ผ่านมา',
     questions: [
       'รู้สึกกังวลหรือตึงเครียดจนผ่อนคลายได้ยาก',
       'รู้สึกว่ามีงานหรือเรื่องที่ต้องรับมือมากเกินไป',
@@ -167,6 +186,43 @@ const assessments = {
 };
 
 const scaleLabels = ['ไม่เลย', 'บางวัน', 'บ่อย', 'เกือบทุกวัน'];
+
+const spstQuestions = [
+  'กลัวทำงานผิดพลาด',
+  'ไปไม่ถึงเป้าหมายที่วางไว้',
+  'ครอบครัวมีความขัดแย้งกันในเรื่องเงินหรือเรื่องงานในบ้าน',
+  'เป็นกังวลกับเรื่องสารพิษหรือมลภาวะในอากาศ น้ำ เสียง และดิน',
+  'รู้สึกว่าต้องแข่งขันหรือเปรียบเทียบ',
+  'เงินไม่พอใช้จ่าย',
+  'กล้ามเนื้อตึงหรือปวด',
+  'ปวดหัวจากความตึงเครียด',
+  'ปวดหลัง',
+  'ความอยากอาหารเปลี่ยนแปลง',
+  'ปวดศีรษะข้างเดียว',
+  'รู้สึกวิตกกังวล',
+  'รู้สึกคับข้องใจ',
+  'รู้สึกโกรธหรือหงุดหงิด',
+  'รู้สึกเศร้า',
+  'ความจำไม่ดี',
+  'รู้สึกสับสน',
+  'ตั้งสมาธิลำบาก',
+  'รู้สึกเหนื่อยง่าย',
+  'เป็นหวัดบ่อย ๆ'
+];
+
+const spstAnswerOptions = [
+  { value: 0, title: 'ไม่เกิดขึ้น', description: 'เหตุการณ์นี้ไม่เกิดขึ้นกับฉัน' },
+  { value: 1, title: 'ไม่รู้สึกเครียด', description: 'เหตุการณ์เกิดขึ้น แต่ไม่ทำให้เครียด' },
+  { value: 2, title: 'เครียดเล็กน้อย', description: 'รู้สึกเครียดเพียงเล็กน้อย' },
+  { value: 3, title: 'เครียดปานกลาง', description: 'รู้สึกเครียดในระดับปานกลาง' },
+  { value: 4, title: 'เครียดมาก', description: 'รู้สึกเครียดมาก' },
+  { value: 5, title: 'เครียดมากที่สุด', description: 'รู้สึกเครียดมากที่สุด' }
+];
+
+const spstState = {
+  currentIndex: 0,
+  answers: Array(spstQuestions.length).fill(null)
+};
 
 const guides = {
   grounding: {
@@ -810,11 +866,146 @@ async function loadMoodHistory() {
   }
 }
 
+function getSpstTotalScore() {
+  return spstState.answers.reduce((sum, answer) => sum + (answer ?? 0), 0);
+}
+
+function getSpstResult(score) {
+  if (score <= 23) {
+    return {
+      level: 'ความเครียดระดับน้อย',
+      advice:
+        'คุณมีความเครียดอยู่ในระดับน้อยและสามารถปรับตัวกับสถานการณ์ต่าง ๆ ได้ค่อนข้างเหมาะสม ควรรักษาการพักผ่อนและทำกิจกรรมที่ช่วยเติมพลังใจอย่างสม่ำเสมอ'
+    };
+  }
+
+  if (score <= 41) {
+    return {
+      level: 'ความเครียดระดับปานกลาง',
+      advice:
+        'คุณมีความเครียดระดับปานกลาง ลองผ่อนคลายด้วยการออกกำลังกาย ฟังเพลง อ่านหนังสือ ทำงานอดิเรก หรือพูดคุยกับคนที่ไว้ใจ'
+    };
+  }
+
+  if (score <= 61) {
+    return {
+      level: 'ความเครียดระดับสูง',
+      advice:
+        'ความเครียดอาจเริ่มส่งผลต่อร่างกาย อารมณ์ และการใช้ชีวิต ควรพักผ่อน ฝึกหายใจ พูดคุยกับคนที่ไว้ใจ และนัดรับคำปรึกษาหากจัดการด้วยตนเองได้ยาก'
+    };
+  }
+
+  return {
+    level: 'ความเครียดระดับรุนแรง',
+    advice:
+      'คุณอาจกำลังเผชิญความเครียดระดับสูงและต่อเนื่อง ควรได้รับความช่วยเหลือจากผู้ให้คำปรึกษาหรือผู้เชี่ยวชาญด้านสุขภาพจิตโดยเร็ว หากรู้สึกไม่ปลอดภัยควรติดต่อบุคคลใกล้ชิดหรือบริการฉุกเฉินทันที'
+  };
+}
+
+function renderSpstQuestion() {
+  const index = spstState.currentIndex;
+  const selectedAnswer = spstState.answers[index];
+  const answeredCount = spstState.answers.filter(answer => answer !== null).length;
+
+  elements.spstProgressText.textContent = `ข้อที่ ${index + 1} จาก ${spstQuestions.length}`;
+  elements.spstAnsweredText.textContent = `ตอบแล้ว ${answeredCount} ข้อ`;
+  elements.spstProgressFill.style.width = `${((index + 1) / spstQuestions.length) * 100}%`;
+  elements.spstQuestionNumber.textContent = `ข้อ ${index + 1}`;
+  elements.spstQuestionText.textContent = spstQuestions[index];
+
+  elements.spstAnswerList.innerHTML = spstAnswerOptions
+    .map(option => `
+      <button
+        class="spst-answer-option${selectedAnswer === option.value ? ' selected' : ''}"
+        type="button"
+        data-spst-answer="${option.value}"
+        aria-pressed="${selectedAnswer === option.value}"
+      >
+        <span class="spst-answer-score">${option.value}</span>
+        <span class="spst-answer-copy">
+          <strong>${escapeHtml(option.title)}</strong>
+          <small>${escapeHtml(option.description)}</small>
+        </span>
+      </button>
+    `)
+    .join('');
+
+  elements.spstPreviousButton.disabled = index === 0;
+  elements.spstNextButton.textContent =
+    index === spstQuestions.length - 1 ? 'ดูผลประเมิน' : 'ถัดไป';
+}
+
+function resetSpstAssessment() {
+  spstState.currentIndex = 0;
+  spstState.answers = Array(spstQuestions.length).fill(null);
+  elements.spstSaveMessage.textContent = '';
+  elements.spstResultView.classList.add('hidden');
+  elements.spstQuestionView.classList.remove('hidden');
+  renderSpstQuestion();
+}
+
+function openSpstAssessment() {
+  resetSpstAssessment();
+  openDialog(elements.stressAssessmentDialog);
+}
+
+function closeSpstAssessment() {
+  closeDialog(elements.stressAssessmentDialog);
+}
+
+async function finishSpstAssessment() {
+  const score = getSpstTotalScore();
+  const result = getSpstResult(score);
+
+  elements.spstQuestionView.classList.add('hidden');
+  elements.spstResultView.classList.remove('hidden');
+  elements.spstResultScore.textContent = score;
+  elements.spstResultLevel.textContent = result.level;
+  elements.spstResultAdvice.textContent = result.advice;
+  elements.spstSaveMessage.textContent = '';
+
+  if (state.user?.role === 'student') {
+    try {
+      await api('/api/assessments', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'แบบวัดความเครียด SPST-20',
+          score,
+          maxScore: 100,
+          level: result.level,
+          answers: spstState.answers
+        })
+      });
+      elements.spstSaveMessage.textContent = 'บันทึกผลประเมินไว้ในบัญชีของคุณแล้ว';
+      await loadAssessmentHistory();
+    } catch (error) {
+      elements.spstSaveMessage.textContent = error.message;
+    }
+  } else {
+    elements.spstSaveMessage.textContent =
+      'คุณสามารถดูผลได้ทันที และเข้าสู่ระบบเมื่อต้องการบันทึกประวัติย้อนหลัง';
+  }
+}
+
+function goFromSpstTo(sectionId) {
+  closeSpstAssessment();
+  window.setTimeout(() => {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }, 80);
+}
+
 function renderAssessmentMenu() {
   elements.assessmentMenu.innerHTML = Object.entries(assessments).map(([key, item]) => `
     <button class="assessment-menu-button" type="button" data-assessment="${key}">
       <span>${item.icon}</span>
-      <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.description)}</small></span>
+      <span>
+        <strong>${escapeHtml(item.title)}</strong>
+        <small>${escapeHtml(item.description)}</small>
+        <em>${key === 'stress' ? 'เริ่มทำแบบประเมิน →' : 'เปิดแบบประเมิน →'}</em>
+      </span>
     </button>`).join('');
 }
 
@@ -1367,16 +1558,52 @@ function bindEvents() {
   elements.refreshMoodButton.addEventListener('click', () => state.user ? loadMoodHistory() : requireLogin());
 
   elements.assessmentMenu.addEventListener('click', event => {
-  const button = event.target.closest('[data-assessment]');
-  if (!button) return;
+    const button = event.target.closest('[data-assessment]');
+    if (!button) return;
 
-  if (button.dataset.assessment === 'stress') {
-    window.location.href = '/stress-assessment.html';
-    return;
-  }
+    if (button.dataset.assessment === 'stress') {
+      openSpstAssessment();
+      return;
+    }
 
-  openAssessment(button.dataset.assessment);
-});
+    openAssessment(button.dataset.assessment);
+  });
+
+  elements.spstCloseButton.addEventListener('click', closeSpstAssessment);
+
+  elements.spstAnswerList.addEventListener('click', event => {
+    const button = event.target.closest('[data-spst-answer]');
+    if (!button) return;
+
+    spstState.answers[spstState.currentIndex] = Number(button.dataset.spstAnswer);
+    renderSpstQuestion();
+  });
+
+  elements.spstPreviousButton.addEventListener('click', () => {
+    if (spstState.currentIndex === 0) return;
+    spstState.currentIndex -= 1;
+    renderSpstQuestion();
+  });
+
+  elements.spstNextButton.addEventListener('click', () => {
+    if (spstState.answers[spstState.currentIndex] === null) {
+      toast('กรุณาเลือกคำตอบก่อนกดถัดไป', true);
+      return;
+    }
+
+    if (spstState.currentIndex < spstQuestions.length - 1) {
+      spstState.currentIndex += 1;
+      renderSpstQuestion();
+      return;
+    }
+
+    finishSpstAssessment();
+  });
+
+  elements.spstRetakeButton.addEventListener('click', resetSpstAssessment);
+  elements.spstBookingButton.addEventListener('click', () => goFromSpstTo('booking'));
+  elements.spstBreathingButton.addEventListener('click', () => goFromSpstTo('breathing'));
+
   elements.assessmentForm.addEventListener('submit', handleAssessmentSubmit);
   elements.refreshAssessmentButton.addEventListener('click', () => state.user ? loadAssessmentHistory() : requireLogin());
 
