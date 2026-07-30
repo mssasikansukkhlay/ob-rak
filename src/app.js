@@ -1367,9 +1367,16 @@ function bindEvents() {
   elements.refreshMoodButton.addEventListener('click', () => state.user ? loadMoodHistory() : requireLogin());
 
   elements.assessmentMenu.addEventListener('click', event => {
-    const button = event.target.closest('[data-assessment]');
-    if (button) openAssessment(button.dataset.assessment);
-  });
+  const button = event.target.closest('[data-assessment]');
+  if (!button) return;
+
+  if (button.dataset.assessment === 'stress') {
+    window.location.href = '/stress-assessment.html';
+    return;
+  }
+
+  openAssessment(button.dataset.assessment);
+});
   elements.assessmentForm.addEventListener('submit', handleAssessmentSubmit);
   elements.refreshAssessmentButton.addEventListener('click', () => state.user ? loadAssessmentHistory() : requireLogin());
 
