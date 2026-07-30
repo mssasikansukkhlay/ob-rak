@@ -1,0 +1,9 @@
+{
+  "name": "ห้องโอบรัก (Ob Rak)",
+  "short_name": "Ob Rak",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf4",
+  "theme_color": "#73a9ad",
+  "description": "พื้นที่ดูแลสุขภาพใจสำหรับนักศึกษาพยาบาล"
+}

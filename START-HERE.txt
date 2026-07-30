@@ -1,0 +1,12 @@
+เริ่มตรงนี้
+
+1) เปิดโฟลเดอร์นี้ด้วย VS Code
+2) สร้าง Supabase project
+3) นำไฟล์ supabase/schema.sql ไป Run ใน Supabase SQL Editor
+4) คัดลอก .env.example เป็น .env.local แล้วใส่ URL และ Publishable key
+5) เปิด Terminal ใน VS Code แล้วพิมพ์:
+
+   npm install
+   npm run dev
+
+6) อ่านขั้นตอนขึ้น Vercel ใน README.md

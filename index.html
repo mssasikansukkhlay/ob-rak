@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#73a9ad" />
+  <meta name="description" content="ห้องโอบรัก พื้นที่ดูแลสุขภาพใจและจองรับคำปรึกษาสำหรับนักศึกษาพยาบาล มทร.ธัญบุรี" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/src/styles.css" />
+  <title>ห้องโอบรัก (Ob Rak)</title>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">ข้ามไปยังเนื้อหา</a>
+
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="ห้องโอบรัก หน้าแรก">
+      <span class="brand-mark">♡</span>
+      <span class="brand-copy">
+        <strong>ห้องโอบรัก</strong>
+        <small>Ob Rak Mental Health Space</small>
+      </span>
+    </a>
+
+    <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="mainNav">เมนู</button>
+
+    <nav class="main-nav" id="mainNav" aria-label="เมนูหลัก">
+      <a href="#home">หน้าแรก</a>
+      <a href="#checkin">เช็กใจ</a>
+      <a href="#assessments">แบบประเมิน</a>
+      <a href="#booking">จองพูดคุย</a>
+      <a href="#breathing">พักใจ</a>
+      <a href="#nursing">สำหรับนักศึกษาพยาบาล</a>
+    </nav>
+
+    <div class="account-actions">
+      <button class="button ghost small" id="loginButton" type="button">เข้าสู่ระบบ</button>
+      <button class="button primary small" id="registerButton" type="button">สมัครสมาชิก</button>
+      <button class="profile-button hidden" id="profileButton" type="button" aria-haspopup="true" aria-expanded="false">
+        <span class="profile-avatar" id="profileAvatar">อ</span>
+        <span id="profileName">ผู้ใช้</span>
+      </button>
+      <div class="profile-menu hidden" id="profileMenu">
+        <p id="profileRole">นักศึกษา</p>
+        <a href="#appointments">นัดหมายของฉัน</a>
+        <a href="#journal">สมุดโอบใจ</a>
+        <button id="logoutButton" type="button">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainContent">
+    <section class="hero section" id="home">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">พื้นที่ปลอดภัยสำหรับนักศึกษาพยาบาล มทร.ธัญบุรี</p>
+        <h1>ไม่ต้องเข้มแข็ง<br />ตลอดเวลาก็ได้</h1>
+        <p class="lead">แวะเช็กใจ ฝึกหายใจ เขียนระบาย และจองเวลาพูดคุยกับผู้ให้คำปรึกษาอย่างเป็นส่วนตัว</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#booking">จองเวลาพูดคุย</a>
+          <a class="button secondary" href="#checkin">เช็กใจวันนี้</a>
+        </div>
+        <p class="tiny-note">ผลแบบประเมินในเว็บไซต์เป็นการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัยโรค</p>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="ภาพกราฟิกแทนพื้นที่พักใจ">
+        <div class="glow glow-one"></div>
+        <div class="glow glow-two"></div>
+        <div class="quote-card">
+          <span class="quote-heart">♡</span>
+          <p>“ทุกความรู้สึกมีพื้นที่ของมัน และคุณไม่จำเป็นต้องรับมือเพียงลำพัง”</p>
+          <div class="mood-row" aria-hidden="true">
+            <span>☀️</span><span>🌤️</span><span>☁️</span><span>🌧️</span><span>🌙</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-actions section" aria-label="เมนูด่วน">
+      <article class="quick-card">
+        <span class="quick-icon">☁</span>
+        <h2>เช็กใจใน 1 นาที</h2>
+        <p>บันทึกอารมณ์ ระดับความเครียด และพลังใจของวันนี้</p>
+        <a href="#checkin">เริ่มเช็กใจ →</a>
+      </article>
+      <article class="quick-card featured">
+        <span class="quick-icon">♡</span>
+        <h2>นัดคุยกับเรา</h2>
+        <p>เลือกผู้ให้คำปรึกษา วัน เวลา และรูปแบบที่คุณสบายใจ</p>
+        <a href="#booking">ดูเวลาว่าง →</a>
+      </article>
+      <article class="quick-card">
+        <span class="quick-icon">◌</span>
+        <h2>พักใจ 3 นาที</h2>
+        <p>ฝึกหายใจและทำกิจกรรม Grounding เพื่อกลับมาอยู่กับปัจจุบัน</p>
+        <a href="#breathing">เริ่มพักใจ →</a>
+      </article>
+      <article class="quick-card">
+        <span class="quick-icon">✎</span>
+        <h2>สมุดโอบใจ</h2>
+        <p>เขียนบันทึกส่วนตัวและสะท้อนประสบการณ์หลังขึ้นฝึก</p>
+        <a href="#journal">เปิดสมุด →</a>
+      </article>
+    </section>
+
+    <section class="section soft-panel" id="checkin">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Daily check-in</p>
+          <h2>วันนี้ใจคุณเป็นอย่างไรบ้าง</h2>
+        </div>
+        <p>ใช้เวลาสั้น ๆ สำรวจตัวเอง ข้อมูลจะบันทึกเมื่อเข้าสู่ระบบเท่านั้น</p>
+      </div>
+
+      <div class="two-column">
+        <form class="card form-card" id="moodForm">
+          <fieldset>
+            <legend>เลือกอารมณ์ที่ใกล้เคียงที่สุด</legend>
+            <div class="mood-picker">
+              <label><input type="radio" name="mood" value="สดใส" required /><span>☀️<small>สดใส</small></span></label>
+              <label><input type="radio" name="mood" value="สบายใจ" /><span>🌤️<small>สบายใจ</small></span></label>
+              <label><input type="radio" name="mood" value="เฉย ๆ" /><span>☁️<small>เฉย ๆ</small></span></label>
+              <label><input type="radio" name="mood" value="เครียด" /><span>🌧️<small>เครียด</small></span></label>
+              <label><input type="radio" name="mood" value="เศร้า" /><span>🌙<small>เศร้า</small></span></label>
+            </div>
+          </fieldset>
+
+          <label class="range-field">
+            <span>ระดับความเครียดวันนี้ <strong id="stressValue">5</strong>/10</span>
+            <input id="stressRange" name="stress" type="range" min="0" max="10" value="5" />
+          </label>
+
+          <label class="range-field">
+            <span>พลังใจวันนี้ <strong id="energyValue">5</strong>/10</span>
+            <input id="energyRange" name="energy" type="range" min="0" max="10" value="5" />
+          </label>
+
+          <label>
+            <span>มีอะไรอยากบอกตัวเองไหม <small>(ไม่บังคับ)</small></span>
+            <textarea name="note" rows="3" maxlength="500" placeholder="เช่น วันนี้เหนื่อยจากการขึ้นฝึก แต่ยังทำเต็มที่แล้ว"></textarea>
+          </label>
+
+          <button class="button primary full" type="submit">บันทึกเช็กอิน</button>
+          <p class="form-message" id="moodMessage" role="status"></p>
+        </form>
+
+        <div class="card history-card">
+          <div class="card-heading-row">
+            <div>
+              <p class="eyebrow">Your pattern</p>
+              <h3>เช็กอินล่าสุด</h3>
+            </div>
+            <button class="text-button" id="refreshMoodButton" type="button">รีเฟรช</button>
+          </div>
+          <div class="empty-state" id="moodHistory">
+            <span>☁</span>
+            <p>เข้าสู่ระบบเพื่อดูบันทึกอารมณ์ย้อนหลัง</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="assessments">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Self assessments</p>
+          <h2>แบบประเมินสุขภาพใจเบื้องต้น</h2>
+        </div>
+        <p>เลือกหัวข้อที่ตรงกับสิ่งที่คุณอยากสำรวจ ใช้เวลาประมาณ 2–3 นาที</p>
+      </div>
+
+      <div class="assessment-layout">
+        <div class="assessment-menu" id="assessmentMenu"></div>
+        <div class="card assessment-card">
+          <div id="assessmentIntro">
+            <span class="assessment-symbol">♡</span>
+            <h3>เลือกแบบประเมินจากด้านซ้าย</h3>
+            <p>คำถามทั้งหมดเป็นตัวอย่างสำหรับโครงงาน ควรให้ผู้เชี่ยวชาญตรวจสอบก่อนนำไปใช้จริง</p>
+          </div>
+          <form class="hidden" id="assessmentForm"></form>
+          <div class="result-box hidden" id="assessmentResult"></div>
+        </div>
+      </div>
+
+      <div class="card assessment-history-card">
+        <div class="card-heading-row">
+          <h3>ประวัติผลประเมิน</h3>
+          <button class="text-button" id="refreshAssessmentButton" type="button">รีเฟรช</button>
+        </div>
+        <div class="empty-state compact" id="assessmentHistory">เข้าสู่ระบบเพื่อดูประวัติผลประเมิน</div>
+      </div>
+    </section>
+
+    <section class="section booking-section" id="booking">
+      <div class="section-heading light-heading">
+        <div>
+          <p class="eyebrow">Therapeutic conversation booking</p>
+          <h2>จองเวลาพูดคุยกับผู้ให้คำปรึกษา</h2>
+        </div>
+        <p>คุณเลือกเรื่องที่อยากคุย รูปแบบ และเวลาที่สบายใจได้ โดยไม่จำเป็นต้องเล่ารายละเอียดทั้งหมดล่วงหน้า</p>
+      </div>
+
+      <div class="booking-grid">
+        <form class="card booking-form" id="bookingForm">
+          <div class="step-label"><span>1</span> เลือกผู้ให้คำปรึกษา</div>
+          <div class="counselor-list" id="counselorList">
+            <div class="loading-box">กำลังโหลดผู้ให้คำปรึกษา...</div>
+          </div>
+
+          <div class="step-label"><span>2</span> เลือกเรื่องที่อยากพูดคุย</div>
+          <label>
+            <span>หัวข้อหลัก</span>
+            <select id="bookingTopic" required>
+              <option value="">เลือกหัวข้อ</option>
+              <option>ความเครียดจากการเรียน</option>
+              <option>ความกังวลก่อนสอบหรือ OSCE</option>
+              <option>ความเครียดจากการขึ้นฝึกปฏิบัติ</option>
+              <option>ความสัมพันธ์กับเพื่อนหรือครอบครัว</option>
+              <option>การนอนหลับ</option>
+              <option>รู้สึกเหนื่อยหรือหมดไฟ</option>
+              <option>ต้องการพื้นที่ระบาย</option>
+              <option>เรื่องอื่น ๆ</option>
+            </select>
+          </label>
+
+          <div class="step-label"><span>3</span> เลือกรูปแบบ วัน และเวลา</div>
+          <div class="form-grid">
+            <label>
+              <span>รูปแบบการพูดคุย</span>
+              <select id="bookingMode" required disabled>
+                <option value="">เลือกผู้ให้คำปรึกษาก่อน</option>
+              </select>
+            </label>
+            <label>
+              <span>วันที่</span>
+              <input id="bookingDate" type="date" required />
+            </label>
+          </div>
+
+          <div>
+            <span class="input-title">ช่วงเวลาที่ว่าง</span>
+            <div class="slot-grid" id="slotGrid">
+              <p class="slot-placeholder">เลือกผู้ให้คำปรึกษาและวันที่ก่อน</p>
+            </div>
+          </div>
+
+          <label>
+            <span>ข้อความถึงผู้ให้คำปรึกษา <small>(ไม่บังคับ)</small></span>
+            <textarea id="bookingNote" rows="3" maxlength="1200" placeholder="เขียนสั้น ๆ ได้ หรือเว้นไว้แล้วค่อยเล่าในวันนัด"></textarea>
+          </label>
+
+          <fieldset class="safety-check">
+            <legend>ขณะนี้คุณรู้สึกว่าตนเองปลอดภัยหรือไม่</legend>
+            <label><input type="radio" name="safety" value="normal" required /> ฉันรู้สึกปลอดภัยและสามารถรอวันนัดได้</label>
+            <label><input type="radio" name="safety" value="concern" /> ฉันไม่ค่อยแน่ใจ แต่อยากจองและดูช่องทางช่วยเหลือเพิ่มเติม</label>
+            <label><input type="radio" name="safety" value="immediate" /> ฉันรู้สึกไม่ปลอดภัยหรือต้องการความช่วยเหลือทันที</label>
+          </fieldset>
+
+          <label class="consent-row">
+            <input id="bookingConsent" type="checkbox" required />
+            <span>ฉันยินยอมให้ใช้ข้อมูลนี้เพื่อจัดการนัดหมายและส่งต่อแก่ผู้ให้คำปรึกษาที่เลือก</span>
+          </label>
+
+          <button class="button primary full" type="submit">ยืนยันการจอง</button>
+          <p class="form-message" id="bookingMessage" role="status"></p>
+        </form>
+
+        <aside class="booking-aside">
+          <div class="card trust-card">
+            <span class="trust-icon">🔒</span>
+            <h3>ความเป็นส่วนตัวสำคัญ</h3>
+            <p>ระบบตัวอย่างแยกสิทธิ์นักศึกษา ผู้ให้คำปรึกษา และผู้ดูแล ข้อมูลการจองไม่แสดงต่อผู้ใช้ทั่วไป</p>
+          </div>
+          <div class="card prepare-card">
+            <h3>เตรียมตัวยังไงก่อนคุย</h3>
+            <ol>
+              <li>เลือกสถานที่ที่รู้สึกปลอดภัย</li>
+              <li>จดหัวข้อที่อยากพูด 1–3 เรื่อง</li>
+              <li>คุณมีสิทธิ์บอกว่า “ยังไม่พร้อมเล่า”</li>
+              <li>หากไม่สะดวกสามารถเลื่อนหรือยกเลิกนัดได้</li>
+            </ol>
+          </div>
+          <div class="urgent-card">
+            <h3>ต้องการความช่วยเหลือทันที?</h3>
+            <p>อย่ารอระบบนัดหมาย ให้ติดต่อบุคคลที่ไว้ใจหรือบริการฉุกเฉินทันที</p>
+            <div class="urgent-actions">
+              <a class="button danger" href="tel:1323">โทร 1323</a>
+              <a class="button danger-outline" href="tel:1669">โทร 1669</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="appointments">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">My appointments</p>
+          <h2>นัดหมายของฉัน</h2>
+        </div>
+        <button class="button secondary small" id="refreshAppointmentsButton" type="button">รีเฟรชรายการ</button>
+      </div>
+      <div class="appointment-list" id="appointmentList">
+        <div class="empty-state card">เข้าสู่ระบบเพื่อดูนัดหมาย</div>
+      </div>
+    </section>
+
+    <section class="section soft-panel" id="breathing">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Rest & reset</p>
+          <h2>ห้องพักใจ</h2>
+        </div>
+        <p>เลือกกิจกรรมสั้น ๆ ให้เหมาะกับเวลาที่มี โดยไม่ต้องทำให้สมบูรณ์แบบ</p>
+      </div>
+
+      <div class="rest-grid">
+        <div class="card breathing-card">
+          <div class="breathing-orbit" id="breathingOrbit">
+            <div class="breathing-circle" id="breathingCircle"><span>หายใจเข้า</span></div>
+          </div>
+          <h3 id="breathingTitle">ฝึกหายใจ 4–4</h3>
+          <p id="breathingInstruction">หายใจเข้า 4 วินาที แล้วหายใจออก 4 วินาทีอย่างสบาย ๆ</p>
+          <div class="timer-display" id="breathingTimer">01:00</div>
+          <div class="breathing-controls">
+            <select id="breathingDuration" aria-label="เลือกระยะเวลา">
+              <option value="60">1 นาที</option>
+              <option value="180">3 นาที</option>
+              <option value="300">5 นาที</option>
+            </select>
+            <button class="button primary" id="startBreathingButton" type="button">เริ่มฝึก</button>
+            <button class="button ghost hidden" id="stopBreathingButton" type="button">หยุด</button>
+          </div>
+        </div>
+
+        <div class="resource-list">
+          <button class="resource-card" type="button" data-guide="grounding">
+            <span class="resource-time">1 นาที</span>
+            <h3>5–4–3–2–1 Grounding</h3>
+            <p>ดึงความสนใจกลับมาที่ประสาทสัมผัสรอบตัว</p>
+            <span>เริ่มกิจกรรม →</span>
+          </button>
+          <button class="resource-card" type="button" data-guide="shoulder">
+            <span class="resource-time">3 นาที</span>
+            <h3>คลายไหล่และกราม</h3>
+            <p>ลดความเกร็งหลังเรียนหรือขึ้นฝึกเป็นเวลานาน</p>
+            <span>เริ่มกิจกรรม →</span>
+          </button>
+          <button class="resource-card" type="button" data-guide="sleep">
+            <span class="resource-time">5 นาที</span>
+            <h3>พักใจก่อนนอน</h3>
+            <p>ค่อย ๆ ปิดวันด้วยการผ่อนคลายร่างกายและความคิด</p>
+            <span>เริ่มกิจกรรม →</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="journal">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Private journal</p>
+          <h2>สมุดโอบใจ</h2>
+        </div>
+        <p>พื้นที่เขียนระบายและสะท้อนสิ่งที่เกิดขึ้น โดยไม่ต้องเรียบเรียงให้สวยงาม</p>
+      </div>
+
+      <div class="two-column journal-layout">
+        <form class="card form-card" id="journalForm">
+          <label>
+            <span>หัวข้อบันทึก</span>
+            <input name="title" maxlength="120" required placeholder="เช่น วันที่ฉันผ่านเวรที่ยากมาได้" />
+          </label>
+          <label>
+            <span>อารมณ์ตอนนี้</span>
+            <select name="mood">
+              <option value="">ไม่ระบุ</option>
+              <option>สดใส</option>
+              <option>สบายใจ</option>
+              <option>เหนื่อย</option>
+              <option>เครียด</option>
+              <option>เศร้า</option>
+              <option>ภูมิใจ</option>
+            </select>
+          </label>
+          <label>
+            <span>เขียนสิ่งที่อยากบอก</span>
+            <textarea name="content" rows="9" maxlength="5000" required placeholder="วันนี้เกิดอะไรขึ้น ฉันรู้สึกอย่างไร และอยากดูแลตัวเองต่ออย่างไร..."></textarea>
+          </label>
+          <button class="button primary full" type="submit">บันทึกลงสมุด</button>
+          <p class="form-message" id="journalMessage" role="status"></p>
+        </form>
+
+        <div class="journal-history" id="journalList">
+          <div class="empty-state card">เข้าสู่ระบบเพื่อดูบันทึกส่วนตัว</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section nursing-section" id="nursing">
+      <div class="section-heading light-heading">
+        <div>
+          <p class="eyebrow">For nursing students</p>
+          <h2>เครื่องมือสำหรับนักศึกษาพยาบาล</h2>
+        </div>
+        <p>เนื้อหาสั้น ๆ เพื่อช่วยเตรียมใจ สะท้อนการฝึก และฝึกการสื่อสารเชิงบำบัด</p>
+      </div>
+
+      <div class="nursing-grid">
+        <article class="nursing-card">
+          <span class="nursing-number">01</span>
+          <h3>เช็กใจก่อนขึ้นฝึก</h3>
+          <p>ประเมินความกังวล การนอน และสิ่งที่อยากขอความช่วยเหลือก่อนขึ้นหอผู้ป่วย</p>
+          <button class="text-button light" type="button" data-guide="preclinical">เปิดแบบเช็กสั้น ๆ →</button>
+        </article>
+        <article class="nursing-card">
+          <span class="nursing-number">02</span>
+          <h3>Reflective Journal</h3>
+          <p>ใช้คำถามตามลำดับ เหตุการณ์ ความรู้สึก การประเมิน การวิเคราะห์ และแผนครั้งต่อไป</p>
+          <a class="text-button light" href="#journal">เริ่มเขียนบันทึก →</a>
+        </article>
+        <article class="nursing-card">
+          <span class="nursing-number">03</span>
+          <h3>ฝึกการสื่อสารเชิงบำบัด</h3>
+          <p>เลือกคำตอบในสถานการณ์จำลอง แล้วดูเหตุผลว่าคำตอบใดสะท้อนการรับฟังอย่างไม่ตัดสิน</p>
+          <button class="text-button light" id="openScenarioButton" type="button">เริ่มสถานการณ์ →</button>
+        </article>
+        <article class="nursing-card">
+          <span class="nursing-number">04</span>
+          <h3>บัตรทบทวนจิตเวช</h3>
+          <p>ทบทวนหลักการประเมินสภาพจิต การเฝ้าระวังความเสี่ยง และบทบาทพยาบาล</p>
+          <button class="text-button light" id="openFlashcardButton" type="button">เปิดบัตรคำ →</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section hidden" id="staffPanel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Staff dashboard</p>
+          <h2 id="staffPanelTitle">แดชบอร์ดผู้ให้คำปรึกษา</h2>
+        </div>
+        <button class="button secondary small" id="refreshStaffButton" type="button">รีเฟรชข้อมูล</button>
+      </div>
+      <div class="stats-grid hidden" id="adminStats"></div>
+      <div class="staff-list" id="staffAppointments"></div>
+    </section>
+
+    <section class="help-strip">
+      <div>
+        <strong>รู้สึกไม่ปลอดภัยหรือมีเหตุฉุกเฉิน?</strong>
+        <span>ติดต่อคนที่ไว้ใจ อยู่ในพื้นที่ที่ปลอดภัย และขอความช่วยเหลือทันที</span>
+      </div>
+      <div class="help-actions">
+        <a href="tel:1323">สายด่วนสุขภาพจิต 1323</a>
+        <a href="tel:1669">การแพทย์ฉุกเฉิน 1669</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a class="brand footer-brand" href="#home"><span class="brand-mark">♡</span><span><strong>ห้องโอบรัก</strong><small>Ob Rak</small></span></a>
+      <p>ต้นแบบระบบส่งเสริมสุขภาพใจสำหรับนักศึกษาพยาบาล มทร.ธัญบุรี</p>
+    </div>
+    <div>
+      <h2>ข้อควรทราบ</h2>
+      <p>เว็บไซต์รุ่นนี้เหมาะสำหรับสาธิตและพัฒนาโครงงาน ไม่ควรใช้เก็บข้อมูลสุขภาพจริงจนกว่าจะผ่านการตรวจสอบด้านวิชาชีพ ความปลอดภัย และกฎหมาย</p>
+    </div>
+    <div>
+      <h2>เมนู</h2>
+      <a href="#booking">จองพูดคุย</a>
+      <a href="#assessments">แบบประเมิน</a>
+      <a href="#breathing">ห้องพักใจ</a>
+    </div>
+  </footer>
+
+  <dialog class="modal" id="loginDialog">
+    <form method="dialog" class="modal-shell" id="loginForm">
+      <button class="modal-close" type="button" data-close-dialog="loginDialog" aria-label="ปิด">×</button>
+      <div class="modal-heading">
+        <span>♡</span>
+        <h2>เข้าสู่ห้องโอบรัก</h2>
+        <p>เข้าสู่ระบบเพื่อบันทึกข้อมูลและจัดการนัดหมาย</p>
+      </div>
+      <label>
+        <span>อีเมล</span>
+        <input name="email" type="email" autocomplete="email" required placeholder="student@example.com" />
+      </label>
+      <label>
+        <span>รหัสผ่าน</span>
+        <input name="password" type="password" autocomplete="current-password" required />
+      </label>
+      <button class="button primary full" type="submit">เข้าสู่ระบบ</button>
+      <p class="form-message" id="loginMessage" role="status"></p>
+      <div class="demo-login">
+        <strong>เริ่มใช้งานครั้งแรก</strong>
+        <span>สมัครบัญชีจากหน้าเว็บก่อน แล้วกำหนดสิทธิ์ผู้ดูแลหรือผู้ให้คำปรึกษาผ่าน Supabase SQL Editor</span>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="registerDialog">
+    <form method="dialog" class="modal-shell" id="registerForm">
+      <button class="modal-close" type="button" data-close-dialog="registerDialog" aria-label="ปิด">×</button>
+      <div class="modal-heading">
+        <span>♡</span>
+        <h2>สมัครสมาชิกนักศึกษา</h2>
+        <p>ใช้ข้อมูลตัวอย่างเท่านั้นในช่วงพัฒนาโครงงาน</p>
+      </div>
+      <div class="form-grid">
+        <label><span>รหัสนักศึกษา</span><input name="studentId" required maxlength="30" /></label>
+        <label><span>ชื่อที่ต้องการให้เรียก</span><input name="name" required maxlength="120" /></label>
+      </div>
+      <label><span>อีเมล</span><input name="email" type="email" required autocomplete="email" /></label>
+      <label><span>รหัสผ่านอย่างน้อย 8 ตัว</span><input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
+      <label class="consent-row"><input name="consent" type="checkbox" required /><span>ฉันยอมรับว่าระบบนี้เป็นต้นแบบและยินยอมให้เก็บข้อมูลเพื่อสาธิตการทำงาน</span></label>
+      <button class="button primary full" type="submit">สร้างบัญชี</button>
+      <p class="form-message" id="registerMessage" role="status"></p>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="guideDialog">
+    <div class="modal-shell guide-shell">
+      <button class="modal-close" type="button" data-close-dialog="guideDialog" aria-label="ปิด">×</button>
+      <div class="guide-content" id="guideContent"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="scenarioDialog">
+    <div class="modal-shell wide-modal">
+      <button class="modal-close" type="button" data-close-dialog="scenarioDialog" aria-label="ปิด">×</button>
+      <div class="modal-heading">
+        <span>💬</span>
+        <h2>สถานการณ์จำลองการสื่อสารเชิงบำบัด</h2>
+      </div>
+      <div id="scenarioContent"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="flashcardDialog">
+    <div class="modal-shell">
+      <button class="modal-close" type="button" data-close-dialog="flashcardDialog" aria-label="ปิด">×</button>
+      <div class="modal-heading">
+        <span>🗂️</span>
+        <h2>บัตรทบทวนจิตเวช</h2>
+      </div>
+      <button class="flashcard" id="flashcard" type="button" aria-label="แตะเพื่อพลิกบัตร">
+        <span class="flashcard-label">คำถาม</span>
+        <strong id="flashcardQuestion"></strong>
+        <p id="flashcardAnswer" class="hidden"></p>
+        <small>แตะเพื่อดูคำตอบ</small>
+      </button>
+      <div class="flashcard-controls">
+        <button class="button ghost" id="previousFlashcard" type="button">ก่อนหน้า</button>
+        <span id="flashcardCount"></span>
+        <button class="button primary" id="nextFlashcard" type="button">ถัดไป</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal urgent-modal" id="urgentDialog">
+    <div class="modal-shell">
+      <button class="modal-close" type="button" data-close-dialog="urgentDialog" aria-label="ปิด">×</button>
+      <div class="urgent-symbol">!</div>
+      <h2>ตอนนี้คุณควรได้รับความช่วยเหลือทันที</h2>
+      <p>ระบบนัดหมายไม่เหมาะกับเหตุเร่งด่วน กรุณาอย่าอยู่ลำพัง ติดต่อคนที่ไว้ใจ ผู้ดูแลใกล้ตัว หรือบริการฉุกเฉินทันที</p>
+      <div class="urgent-actions vertical">
+        <a class="button danger full" href="tel:1323">โทรสายด่วนสุขภาพจิต 1323</a>
+        <a class="button danger-outline full" href="tel:1669">โทรการแพทย์ฉุกเฉิน 1669</a>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
