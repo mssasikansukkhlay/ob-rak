@@ -31,10 +31,12 @@ const state = {
   selectedCounselorId: null,
   selectedSlot: null,
   activeAssessment: null,
+  currentPage: 'home',
   breathing: { interval: null, phaseTimer: null, remaining: 60, inhale: true },
   scenarioIndex: 0,
   flashcardIndex: 0,
-  flashcardFlipped: false
+  flashcardFlipped: false,
+  chatbot: { started: false, messages: [] }
 };
 
 const $ = selector => document.querySelector(selector);
@@ -70,11 +72,43 @@ const elements = {
   moodHistory: $('#moodHistory'),
   refreshMoodButton: $('#refreshMoodButton'),
   assessmentMenu: $('#assessmentMenu'),
-  assessmentIntro: $('#assessmentIntro'),
-  assessmentForm: $('#assessmentForm'),
-  assessmentResult: $('#assessmentResult'),
   assessmentHistory: $('#assessmentHistory'),
   refreshAssessmentButton: $('#refreshAssessmentButton'),
+  chatbotFloatingButton: $('#chatbotFloatingButton'),
+  chatbotMessages: $('#chatbotMessages'),
+  chatbotForm: $('#chatbotForm'),
+  chatbotInput: $('#chatbotInput'),
+  chatbotSendButton: $('#chatbotSendButton'),
+  chatbotQuickReplies: $('#chatbotQuickReplies'),
+  chatbotClearButton: $('#chatbotClearButton'),
+  chatbotUrgentButton: $('#chatbotUrgentButton'),
+  chatbotStatus: $('#chatbotStatus'),
+  genericAssessmentDialog: $('#genericAssessmentDialog'),
+  genericAssessmentCloseButton: $('#genericAssessmentCloseButton'),
+  genericAssessmentKicker: $('#genericAssessmentKicker'),
+  genericAssessmentTitle: $('#genericAssessmentTitle'),
+  genericAssessmentBadge: $('#genericAssessmentBadge'),
+  genericAssessmentDescription: $('#genericAssessmentDescription'),
+  genericAssessmentInstruction: $('#genericAssessmentInstruction'),
+  genericAssessmentScale: $('#genericAssessmentScale'),
+  genericAssessmentQuestionView: $('#genericAssessmentQuestionView'),
+  genericAssessmentResultView: $('#genericAssessmentResultView'),
+  genericAssessmentProgressText: $('#genericAssessmentProgressText'),
+  genericAssessmentAnsweredText: $('#genericAssessmentAnsweredText'),
+  genericAssessmentProgressFill: $('#genericAssessmentProgressFill'),
+  genericAssessmentQuestionNumber: $('#genericAssessmentQuestionNumber'),
+  genericAssessmentQuestionText: $('#genericAssessmentQuestionText'),
+  genericAssessmentAnswerList: $('#genericAssessmentAnswerList'),
+  genericAssessmentPreviousButton: $('#genericAssessmentPreviousButton'),
+  genericAssessmentNextButton: $('#genericAssessmentNextButton'),
+  genericAssessmentResultLevel: $('#genericAssessmentResultLevel'),
+  genericAssessmentResultScore: $('#genericAssessmentResultScore'),
+  genericAssessmentResultMax: $('#genericAssessmentResultMax'),
+  genericAssessmentResultAdvice: $('#genericAssessmentResultAdvice'),
+  genericAssessmentSaveMessage: $('#genericAssessmentSaveMessage'),
+  genericAssessmentBookingButton: $('#genericAssessmentBookingButton'),
+  genericAssessmentBreathingButton: $('#genericAssessmentBreathingButton'),
+  genericAssessmentRetakeButton: $('#genericAssessmentRetakeButton'),
   stressAssessmentDialog: $('#stressAssessmentDialog'),
   spstCloseButton: $('#spstCloseButton'),
   spstQuestionView: $('#spstQuestionView'),
@@ -186,6 +220,13 @@ const assessments = {
 };
 
 const scaleLabels = ['ไม่เลย', 'บางวัน', 'บ่อย', 'เกือบทุกวัน'];
+
+const genericAssessmentState = {
+  key: null,
+  currentIndex: 0,
+  answers: []
+};
+
 
 const spstQuestions = [
   'กลัวทำงานผิดพลาด',
@@ -325,6 +366,57 @@ function openDialog(dialog) {
 function closeDialog(dialog) {
   if (dialog.open) dialog.close();
   if (!$$('dialog[open]').length) document.body.classList.remove('modal-open');
+}
+
+const APP_PAGE_GROUPS = {
+  home: ['home', 'homeQuickActions'],
+  checkin: ['checkin'],
+  assessments: ['assessments'],
+  chatbot: ['chatbot'],
+  booking: ['booking'],
+  appointments: ['appointments'],
+  breathing: ['breathing'],
+  journal: ['journal'],
+  nursing: ['nursing'],
+  staffPanel: ['staffPanel']
+};
+
+function showAppPage(pageId = 'home', options = {}) {
+  const { scroll = true } = options;
+  const normalizedPage = APP_PAGE_GROUPS[pageId] ? pageId : 'home';
+  const visibleIds = new Set(APP_PAGE_GROUPS[normalizedPage]);
+
+  $$('#mainContent > section').forEach(section => {
+    if (section.classList.contains('help-strip')) return;
+    section.classList.toggle('app-page-hidden', !visibleIds.has(section.id));
+  });
+
+  state.currentPage = normalizedPage;
+  elements.chatbotFloatingButton.classList.toggle('hidden', normalizedPage === 'chatbot');
+
+  $$('.main-nav a[href^="#"]').forEach(link => {
+    const linkPage = link.getAttribute('href').slice(1);
+    link.classList.toggle('active', linkPage === normalizedPage);
+  });
+
+  elements.mainNav.classList.remove('open');
+  elements.menuButton.setAttribute('aria-expanded', 'false');
+
+  if (normalizedPage === 'assessments' && state.user?.role === 'student') {
+    loadAssessmentHistory();
+  }
+
+  if (normalizedPage === 'appointments' && state.user?.role === 'student') {
+    loadAppointments();
+  }
+
+  if (normalizedPage === 'journal' && state.user?.role === 'student') {
+    loadJournal();
+  }
+
+  if (scroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 async function fetchProfile(authUser = null) {
@@ -987,89 +1079,157 @@ async function finishSpstAssessment() {
   }
 }
 
-function goFromSpstTo(sectionId) {
+function goFromSpstTo(pageId) {
   closeSpstAssessment();
-  window.setTimeout(() => {
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }, 80);
+  window.setTimeout(() => showAppPage(pageId), 80);
 }
 
 function renderAssessmentMenu() {
   elements.assessmentMenu.innerHTML = Object.entries(assessments).map(([key, item]) => `
     <button class="assessment-menu-button" type="button" data-assessment="${key}">
-      <span>${item.icon}</span>
-      <span>
+      <span class="assessment-card-icon">${item.icon}</span>
+      <span class="assessment-card-copy">
         <strong>${escapeHtml(item.title)}</strong>
         <small>${escapeHtml(item.description)}</small>
-        <em>${key === 'stress' ? 'เริ่มทำแบบประเมิน →' : 'เปิดแบบประเมิน →'}</em>
+        <em>เริ่มทำแบบประเมิน →</em>
       </span>
     </button>`).join('');
 }
 
-function openAssessment(key) {
-  const assessment = assessments[key];
-  if (!assessment) return;
-  state.activeAssessment = key;
-  $$('.assessment-menu-button').forEach(button => button.classList.toggle('active', button.dataset.assessment === key));
-  elements.assessmentIntro.classList.add('hidden');
-  elements.assessmentResult.classList.add('hidden');
-  elements.assessmentForm.classList.remove('hidden');
-  elements.assessmentForm.innerHTML = `
-    <div class="card-heading-row">
-      <div><p class="eyebrow">${assessment.icon} ${escapeHtml(assessment.title)}</p><h3>${escapeHtml(assessment.description)}</h3></div>
-    </div>
-    ${assessment.questions.map((question, index) => `
-      <fieldset class="assessment-question">
-        <legend>${index + 1}. ${escapeHtml(question)}</legend>
-        <div class="scale-options">
-          ${scaleLabels.map((label, score) => `<label><input type="radio" name="q${index}" value="${score}" required /><span>${score}<br>${escapeHtml(label)}</span></label>`).join('')}
-        </div>
-      </fieldset>`).join('')}
-    <button class="button primary full" type="submit">ดูผลประเมิน</button>
-    <p class="tiny-note">ผลนี้เป็นการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัย และคำถามเป็นตัวอย่างสำหรับโครงงาน</p>`;
+function getGenericAssessment() {
+  return assessments[genericAssessmentState.key] || null;
 }
 
-async function handleAssessmentSubmit(event) {
-  event.preventDefault();
-  const assessment = assessments[state.activeAssessment];
+function resetGenericAssessment() {
+  const assessment = getGenericAssessment();
   if (!assessment) return;
-  const formData = new FormData(elements.assessmentForm);
-  const answers = assessment.questions.map((_, index) => Number(formData.get(`q${index}`)));
-  if (answers.some(Number.isNaN)) return;
-  const score = answers.reduce((sum, value) => sum + value, 0);
+
+  genericAssessmentState.currentIndex = 0;
+  genericAssessmentState.answers = Array(assessment.questions.length).fill(null);
+
+  elements.genericAssessmentResultView.classList.add('hidden');
+  elements.genericAssessmentQuestionView.classList.remove('hidden');
+  elements.genericAssessmentSaveMessage.textContent = '';
+
+  renderGenericAssessmentQuestion();
+}
+
+function renderGenericAssessmentQuestion() {
+  const assessment = getGenericAssessment();
+  if (!assessment) return;
+
+  const index = genericAssessmentState.currentIndex;
+  const selectedAnswer = genericAssessmentState.answers[index];
+  const answeredCount = genericAssessmentState.answers.filter(answer => answer !== null).length;
+
+  elements.genericAssessmentProgressText.textContent =
+    `ข้อที่ ${index + 1} จาก ${assessment.questions.length}`;
+  elements.genericAssessmentAnsweredText.textContent =
+    `ตอบแล้ว ${answeredCount} ข้อ`;
+  elements.genericAssessmentProgressFill.style.width =
+    `${((index + 1) / assessment.questions.length) * 100}%`;
+  elements.genericAssessmentQuestionNumber.textContent = `ข้อ ${index + 1}`;
+  elements.genericAssessmentQuestionText.textContent = assessment.questions[index];
+
+  elements.genericAssessmentAnswerList.innerHTML = scaleLabels
+    .map((label, score) => `
+      <button
+        class="spst-answer-option${selectedAnswer === score ? ' selected' : ''}"
+        type="button"
+        data-generic-answer="${score}"
+        aria-pressed="${selectedAnswer === score}"
+      >
+        <span class="spst-answer-score">${score}</span>
+        <span class="spst-answer-copy">
+          <strong>${escapeHtml(label)}</strong>
+          <small>${score === 0 ? 'ไม่ตรงกับฉันเลย' : score === 3 ? 'เกิดขึ้นเกือบทุกวัน' : 'เลือกคำตอบนี้'}</small>
+        </span>
+      </button>
+    `)
+    .join('');
+
+  elements.genericAssessmentPreviousButton.disabled = index === 0;
+  elements.genericAssessmentNextButton.textContent =
+    index === assessment.questions.length - 1 ? 'ดูผลประเมิน' : 'ถัดไป';
+}
+
+function openAssessment(key) {
+  if (key === 'stress') {
+    openSpstAssessment();
+    return;
+  }
+
+  const assessment = assessments[key];
+  if (!assessment) return;
+
+  genericAssessmentState.key = key;
+  state.activeAssessment = key;
+
+  elements.genericAssessmentKicker.textContent = `${assessment.icon} แบบประเมินสุขภาพใจ`;
+  elements.genericAssessmentTitle.textContent = assessment.title;
+  elements.genericAssessmentBadge.textContent =
+    key === 'burnout' ? 'BURNOUT CHECK' : 'SLEEP CHECK';
+  elements.genericAssessmentDescription.textContent = assessment.description;
+  elements.genericAssessmentInstruction.textContent =
+    'ตอบจากความรู้สึกและประสบการณ์ของคุณในช่วง 7 วันที่ผ่านมา';
+  elements.genericAssessmentScale.innerHTML = scaleLabels
+    .map((label, score) => `<li><span>${score}</span> ${escapeHtml(label)}</li>`)
+    .join('');
+
+  resetGenericAssessment();
+  openDialog(elements.genericAssessmentDialog);
+}
+
+function closeGenericAssessment() {
+  closeDialog(elements.genericAssessmentDialog);
+}
+
+async function finishGenericAssessment() {
+  const assessment = getGenericAssessment();
+  if (!assessment) return;
+
+  const score = genericAssessmentState.answers.reduce(
+    (sum, value) => sum + (value ?? 0),
+    0
+  );
   const maxScore = assessment.questions.length * 3;
   const result = assessment.result(score);
 
-  elements.assessmentForm.classList.add('hidden');
-  elements.assessmentResult.classList.remove('hidden');
-  elements.assessmentResult.innerHTML = `
-    <p class="eyebrow">ผลประเมินเบื้องต้น</p>
-    <h3>${escapeHtml(result.level)}</h3>
-    <p>คะแนน ${score}/${maxScore}</p>
-    <p>${escapeHtml(result.advice)}</p>
-    <div class="hero-actions">
-      <button class="button secondary" type="button" id="retakeAssessmentButton">ทำอีกครั้ง</button>
-      ${score >= Math.ceil(maxScore * 0.65) ? '<a class="button primary" href="#booking">จองพูดคุย</a>' : ''}
-    </div>`;
-  $('#retakeAssessmentButton').addEventListener('click', () => openAssessment(state.activeAssessment));
+  elements.genericAssessmentQuestionView.classList.add('hidden');
+  elements.genericAssessmentResultView.classList.remove('hidden');
+  elements.genericAssessmentResultScore.textContent = score;
+  elements.genericAssessmentResultMax.textContent = `/${maxScore}`;
+  elements.genericAssessmentResultLevel.textContent = result.level;
+  elements.genericAssessmentResultAdvice.textContent = result.advice;
+  elements.genericAssessmentSaveMessage.textContent = '';
 
-  if (state.user && state.user.role === 'student') {
+  if (state.user?.role === 'student') {
     try {
       await api('/api/assessments', {
         method: 'POST',
-        body: JSON.stringify({ type: assessment.title, score, maxScore, level: result.level, answers })
+        body: JSON.stringify({
+          type: assessment.title,
+          score,
+          maxScore,
+          level: result.level,
+          answers: genericAssessmentState.answers
+        })
       });
-      toast('บันทึกผลประเมินแล้ว');
+      elements.genericAssessmentSaveMessage.textContent =
+        'บันทึกผลประเมินไว้ในบัญชีของคุณแล้ว';
       await loadAssessmentHistory();
     } catch (error) {
-      toast(error.message, true);
+      elements.genericAssessmentSaveMessage.textContent = error.message;
     }
   } else {
-    toast('เข้าสู่ระบบเพื่อบันทึกผลประเมินย้อนหลัง');
+    elements.genericAssessmentSaveMessage.textContent =
+      'คุณสามารถดูผลได้ทันที และเข้าสู่ระบบเมื่อต้องการบันทึกประวัติย้อนหลัง';
   }
+}
+
+function goFromGenericAssessmentTo(pageId) {
+  closeGenericAssessment();
+  window.setTimeout(() => showAppPage(pageId), 80);
 }
 
 async function loadAssessmentHistory() {
@@ -1500,6 +1660,271 @@ function flipFlashcard() {
   elements.flashcard.querySelector('small').textContent = state.flashcardFlipped ? 'แตะเพื่อซ่อนคำตอบ' : 'แตะเพื่อดูคำตอบ';
 }
 
+
+const CHATBOT_EMERGENCY_PATTERNS = [
+  /อยากตาย/i,
+  /ไม่อยากอยู่/i,
+  /ฆ่าตัวตาย/i,
+  /ทำร้ายตัวเอง/i,
+  /ทำร้ายตนเอง/i,
+  /จบชีวิต/i,
+  /มีแผน.*ตาย/i,
+  /ไม่ปลอดภัย/i,
+  /เสียง.*สั่ง.*ทำร้าย/i,
+  /ทำร้ายคนอื่น/i,
+  /ฆ่าคน/i
+];
+
+const CHATBOT_RESPONSES = {
+  stress: {
+    text: 'ฟังดูเหมือนช่วงนี้คุณกำลังรับมือหลายอย่างพร้อมกันเลยนะ ความเครียดนั้นกระทบการนอน การเรียน หรือร่างกายของคุณมากที่สุดด้านไหน',
+    actions: [
+      { label: 'ทำ SPST-20', action: 'assessment', target: 'stress' },
+      { label: 'ฝึกหายใจ 3 นาที', action: 'page', target: 'breathing' },
+      { label: 'จองเวลาพูดคุย', action: 'page', target: 'booking' }
+    ]
+  },
+  exam: {
+    text: 'ความกังวลก่อนสอบเกิดขึ้นได้ โดยเฉพาะเมื่อเราคาดหวังกับตัวเองสูง ลองบอกโอบใจได้ไหมว่า กลัวเรื่องความจำไม่ทัน ทำข้อสอบไม่ได้ หรือกลัวผลคะแนนมากที่สุด',
+    actions: [
+      { label: 'พักใจก่อนอ่านต่อ', action: 'page', target: 'breathing' },
+      { label: 'เช็กความเครียด', action: 'assessment', target: 'stress' }
+    ]
+  },
+  clinical: {
+    text: 'การขึ้นฝึกอาจทำให้ทั้งเหนื่อย กังวล และกลัวทำผิดได้ คุณไม่ได้แปลว่าไม่เก่งเพียงเพราะวันนี้ยากนะ ตอนนี้อยากให้ช่วยจัดการความกังวล หรืออยากเล่าเหตุการณ์ก่อน',
+    actions: [
+      { label: 'เช็กใจก่อนขึ้นฝึก', action: 'guide', target: 'preclinical' },
+      { label: 'เขียน Reflective Journal', action: 'page', target: 'journal' },
+      { label: 'จองผู้ให้คำปรึกษา', action: 'page', target: 'booking' }
+    ]
+  },
+  burnout: {
+    text: 'ความรู้สึกหมดไฟมักไม่ได้เกิดจากความขี้เกียจ แต่อาจเป็นสัญญาณว่าร่างกายและใจใช้พลังมานานเกินไป ช่วงนี้คุณรู้สึกเหนื่อย เบื่อชา หรือไม่อยากเริ่มงานมากที่สุดแบบไหน',
+    actions: [
+      { label: 'ทำแบบเช็กหมดไฟ', action: 'assessment', target: 'burnout' },
+      { label: 'ไปห้องพักใจ', action: 'page', target: 'breathing' },
+      { label: 'จองเวลาพูดคุย', action: 'page', target: 'booking' }
+    ]
+  },
+  sleep: {
+    text: 'การนอนไม่พอทำให้ความเครียดและความรู้สึกหนักขึ้นได้ ลองสังเกตว่าปัญหาหลักคือหลับยาก ตื่นบ่อย หรือคิดวนก่อนนอน',
+    actions: [
+      { label: 'เช็กคุณภาพการนอน', action: 'assessment', target: 'sleep' },
+      { label: 'กิจกรรมพักใจก่อนนอน', action: 'guide', target: 'sleep' }
+    ]
+  },
+  breathe: {
+    text: 'ได้เลย ลองวางเท้าทั้งสองข้างให้มั่นคง ผ่อนไหล่ แล้วหายใจเข้าอย่างสบาย 4 วินาที จากนั้นค่อย ๆ หายใจออก 4 วินาที กดปุ่มด้านล่างเพื่อเริ่มตัวจับเวลาได้เลย',
+    actions: [
+      { label: 'เปิดห้องฝึกหายใจ', action: 'page', target: 'breathing' }
+    ]
+  },
+  assessment: {
+    text: 'โอบใจช่วยเลือกได้ค่ะ หากอยากสำรวจความเครียดให้เริ่มจาก SPST-20 ถ้าเหนื่อยล้าจากการเรียนหรือฝึกให้เลือกภาวะหมดไฟ และถ้ากังวลเรื่องการพักผ่อนให้เลือกคุณภาพการนอน',
+    actions: [
+      { label: 'ดูแบบประเมินทั้งหมด', action: 'page', target: 'assessments' },
+      { label: 'เริ่ม SPST-20', action: 'assessment', target: 'stress' }
+    ]
+  },
+  booking: {
+    text: 'การอยากคุยกับผู้ให้คำปรึกษาเป็นการดูแลตัวเองที่ดีนะ คุณสามารถเลือกรูปแบบ วัน และเวลาที่สบายใจได้จากหน้าจองพูดคุย',
+    actions: [
+      { label: 'ไปหน้าจองพูดคุย', action: 'page', target: 'booking' }
+    ]
+  },
+  journal: {
+    text: 'การเขียนช่วยนำความคิดที่วนอยู่ในใจออกมาเป็นคำได้ คุณไม่ต้องเขียนให้สวย แค่เริ่มจาก “วันนี้เกิดอะไรขึ้น” และ “ตอนนี้ฉันรู้สึกอย่างไร”',
+    actions: [
+      { label: 'เปิดสมุดโอบใจ', action: 'page', target: 'journal' }
+    ]
+  },
+  listen: {
+    text: 'โอบใจอยู่ตรงนี้และพร้อมฟัง คุณไม่ต้องรีบเรียบเรียงให้ดี เล่าได้เลยว่า วันนี้เกิดอะไรขึ้นหรือช่วงนี้เรื่องไหนหนักที่สุด',
+    actions: []
+  },
+  nursing: {
+    text: 'เรามีโหมดฝึกสำหรับนักศึกษาพยาบาล เช่น สถานการณ์สื่อสารเชิงบำบัดและบัตรทบทวนจิตเวช คุณอยากลองสถานการณ์จำลองไหม',
+    actions: [
+      { label: 'ฝึกสถานการณ์', action: 'scenario', target: 'scenario' },
+      { label: 'ไปหน้าเครื่องมือนักศึกษา', action: 'page', target: 'nursing' }
+    ]
+  },
+  hello: {
+    text: 'สวัสดีค่ะ โอบใจอยู่ตรงนี้นะ วันนี้อยากเล่าเรื่องอะไร หรืออยากให้ช่วยเลือกกิจกรรมดูแลใจแบบไหน',
+    actions: [
+      { label: 'อยากมีคนรับฟัง', action: 'prompt', target: 'อยากมีคนรับฟัง' },
+      { label: 'ช่วยเลือกแบบประเมิน', action: 'prompt', target: 'ฉันควรทำแบบประเมินอะไร' }
+    ]
+  },
+  fallback: {
+    text: 'ขอบคุณที่เล่าให้ฟังนะ โอบใจอาจยังเข้าใจไม่ครบ แต่พร้อมฟังต่อ คุณอยากเล่าเพิ่มว่าเรื่องนี้ทำให้รู้สึกอย่างไร หรืออยากให้ช่วยพาไปพักใจ ทำแบบประเมิน หรือจองพูดคุย',
+    actions: [
+      { label: 'พักใจ', action: 'page', target: 'breathing' },
+      { label: 'แบบประเมิน', action: 'page', target: 'assessments' },
+      { label: 'จองพูดคุย', action: 'page', target: 'booking' }
+    ]
+  }
+};
+
+function chatbotHasEmergencyRisk(text) {
+  return CHATBOT_EMERGENCY_PATTERNS.some(pattern => pattern.test(text));
+}
+
+function getChatbotIntent(text) {
+  const normalized = text.toLowerCase().trim();
+
+  if (/สวัสดี|หวัดดี|hello|hi/.test(normalized)) return 'hello';
+  if (/อยากฟัง|รับฟัง|ระบาย|เล่าให้ฟัง|คนคุย/.test(normalized)) return 'listen';
+  if (/ฆ่าตัวตาย|อยากตาย|ไม่อยากอยู่|ทำร้ายตัวเอง|ไม่ปลอดภัย/.test(normalized)) return 'emergency';
+  if (/สอบ|osce|คะแนน|อ่านหนังสือ/.test(normalized)) return 'exam';
+  if (/ขึ้นฝึก|หอผู้ป่วย|เวร|อาจารย์นิเทศ|ผู้ป่วย/.test(normalized)) return 'clinical';
+  if (/หมดไฟ|ไม่อยากทำอะไร|เหนื่อยล้า|เบื่อชา/.test(normalized)) return 'burnout';
+  if (/นอน|หลับ|ตื่นบ่อย|ง่วง/.test(normalized)) return 'sleep';
+  if (/หายใจ|ผ่อนคลาย|พักใจ|grounding/.test(normalized)) return 'breathe';
+  if (/แบบประเมิน|ประเมิน|เช็กความเครียด/.test(normalized)) return 'assessment';
+  if (/จอง|ผู้ให้คำปรึกษา|นักจิตวิทยา|อยากคุยกับคน/.test(normalized)) return 'booking';
+  if (/เขียน|สมุด|บันทึก|journal/.test(normalized)) return 'journal';
+  if (/ฝึกสนทนา|สื่อสารเชิงบำบัด|นักศึกษาพยาบาล|สถานการณ์/.test(normalized)) return 'nursing';
+  if (/เครียด|กังวล|กลัว|กดดัน|คิดมาก|ใจเต้น/.test(normalized)) return 'stress';
+  return 'fallback';
+}
+
+function chatbotWelcomeMessage() {
+  return {
+    role: 'bot',
+    text: 'สวัสดีค่ะ เราคือ “โอบใจ” ผู้ช่วยรับฟังเบื้องต้น วันนี้คุณอยากเล่าเรื่องอะไร หรือเลือกหัวข้อเริ่มต้นได้เลยนะ',
+    actions: [
+      { label: 'เครียดจากการเรียน', action: 'prompt', target: 'ช่วงนี้เครียดจากการเรียน' },
+      { label: 'เหนื่อยจากการขึ้นฝึก', action: 'prompt', target: 'เหนื่อยจากการขึ้นฝึก' },
+      { label: 'อยากมีคนรับฟัง', action: 'prompt', target: 'อยากมีคนรับฟัง' }
+    ]
+  };
+}
+
+function resetChatbot() {
+  state.chatbot.messages = [chatbotWelcomeMessage()];
+  state.chatbot.started = true;
+  renderChatbotMessages();
+  elements.chatbotInput.value = '';
+  elements.chatbotStatus.textContent = 'พร้อมรับฟัง';
+}
+
+function addChatbotMessage(role, text, actions = []) {
+  state.chatbot.messages.push({ role, text, actions });
+  renderChatbotMessages();
+}
+
+function renderChatbotMessages() {
+  elements.chatbotMessages.innerHTML = state.chatbot.messages.map((message, index) => `
+    <article class="chatbot-message ${message.role === 'user' ? 'user' : 'bot'}">
+      ${message.role === 'bot' ? '<div class="chatbot-mini-avatar" aria-hidden="true">ใจ</div>' : ''}
+      <div class="chatbot-bubble">
+        <p>${escapeHtml(message.text)}</p>
+        ${message.actions?.length ? `
+          <div class="chatbot-message-actions">
+            ${message.actions.map(action => `
+              <button
+                type="button"
+                data-chat-action="${escapeHtml(action.action)}"
+                data-chat-target="${escapeHtml(action.target)}"
+                data-chat-message-index="${index}"
+              >${escapeHtml(action.label)}</button>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    </article>
+  `).join('');
+
+  window.requestAnimationFrame(() => {
+    elements.chatbotMessages.scrollTop = elements.chatbotMessages.scrollHeight;
+  });
+}
+
+function chatbotEmergencyResponse() {
+  return {
+    text: 'สิ่งที่คุณกำลังเผชิญอาจต้องได้รับความช่วยเหลือทันที กรุณาอย่าอยู่ลำพัง ย้ายไปอยู่ใกล้คนที่ไว้ใจหรือพื้นที่ปลอดภัย และติดต่อความช่วยเหลือตอนนี้ โอบใจไม่สามารถดูแลเหตุฉุกเฉินแทนผู้เชี่ยวชาญได้',
+    actions: [
+      { label: 'โทรสายด่วน 1323', action: 'phone', target: '1323' },
+      { label: 'โทรฉุกเฉิน 1669', action: 'phone', target: '1669' },
+      { label: 'ดูช่องทางช่วยเหลือ', action: 'urgent', target: 'urgent' }
+    ]
+  };
+}
+
+function handleChatbotInput(rawText) {
+  const text = String(rawText || '').trim();
+  if (!text) return;
+
+  addChatbotMessage('user', text);
+  elements.chatbotInput.value = '';
+  elements.chatbotStatus.textContent = 'กำลังตอบ...';
+
+  window.setTimeout(() => {
+    if (chatbotHasEmergencyRisk(text)) {
+      const response = chatbotEmergencyResponse();
+      addChatbotMessage('bot', response.text, response.actions);
+      elements.chatbotStatus.textContent = 'แนะนำความช่วยเหลือเร่งด่วน';
+      return;
+    }
+
+    const intent = getChatbotIntent(text);
+    const response = CHATBOT_RESPONSES[intent] || CHATBOT_RESPONSES.fallback;
+    addChatbotMessage('bot', response.text, response.actions);
+    elements.chatbotStatus.textContent = 'พร้อมรับฟัง';
+  }, 450);
+}
+
+function openChatbotPage() {
+  if (!state.chatbot.started) resetChatbot();
+  showAppPage('chatbot');
+  window.setTimeout(() => elements.chatbotInput.focus(), 180);
+}
+
+function handleChatbotAction(button) {
+  const action = button.dataset.chatAction;
+  const target = button.dataset.chatTarget;
+
+  if (action === 'page') {
+    showAppPage(target);
+    return;
+  }
+
+  if (action === 'assessment') {
+    showAppPage('assessments', { scroll: false });
+    openAssessment(target);
+    return;
+  }
+
+  if (action === 'guide') {
+    showAppPage('breathing', { scroll: false });
+    openGuide(target);
+    return;
+  }
+
+  if (action === 'scenario') {
+    state.scenarioIndex = 0;
+    renderScenario();
+    openDialog(elements.scenarioDialog);
+    return;
+  }
+
+  if (action === 'prompt') {
+    handleChatbotInput(target);
+    return;
+  }
+
+  if (action === 'phone') {
+    window.location.href = `tel:${target}`;
+    return;
+  }
+
+  if (action === 'urgent') {
+    openDialog(elements.urgentDialog);
+  }
+}
+
 function todayString() {
   return dateInputString(new Date());
 }
@@ -1542,6 +1967,18 @@ function bindEvents() {
   document.addEventListener('click', event => {
     const closeButton = event.target.closest('[data-close-dialog]');
     if (closeButton) closeDialog(document.getElementById(closeButton.dataset.closeDialog));
+
+    const pageLink = event.target.closest('a[href^="#"]');
+    if (pageLink) {
+      const pageId = pageLink.getAttribute('href').slice(1);
+      if (APP_PAGE_GROUPS[pageId]) {
+        event.preventDefault();
+        if (elements.stressAssessmentDialog.open) closeSpstAssessment();
+        if (elements.genericAssessmentDialog.open) closeGenericAssessment();
+        showAppPage(pageId);
+      }
+    }
+
     if (!event.target.closest('.account-actions')) {
       elements.profileMenu.classList.add('hidden');
       elements.profileButton.setAttribute('aria-expanded', 'false');
@@ -1560,12 +1997,6 @@ function bindEvents() {
   elements.assessmentMenu.addEventListener('click', event => {
     const button = event.target.closest('[data-assessment]');
     if (!button) return;
-
-    if (button.dataset.assessment === 'stress') {
-      openSpstAssessment();
-      return;
-    }
-
     openAssessment(button.dataset.assessment);
   });
 
@@ -1604,8 +2035,76 @@ function bindEvents() {
   elements.spstBookingButton.addEventListener('click', () => goFromSpstTo('booking'));
   elements.spstBreathingButton.addEventListener('click', () => goFromSpstTo('breathing'));
 
-  elements.assessmentForm.addEventListener('submit', handleAssessmentSubmit);
+  elements.genericAssessmentCloseButton.addEventListener('click', closeGenericAssessment);
+  elements.genericAssessmentAnswerList.addEventListener('click', event => {
+    const button = event.target.closest('[data-generic-answer]');
+    if (!button) return;
+
+    genericAssessmentState.answers[genericAssessmentState.currentIndex] =
+      Number(button.dataset.genericAnswer);
+    renderGenericAssessmentQuestion();
+  });
+
+  elements.genericAssessmentPreviousButton.addEventListener('click', () => {
+    if (genericAssessmentState.currentIndex === 0) return;
+    genericAssessmentState.currentIndex -= 1;
+    renderGenericAssessmentQuestion();
+  });
+
+  elements.genericAssessmentNextButton.addEventListener('click', () => {
+    if (genericAssessmentState.answers[genericAssessmentState.currentIndex] === null) {
+      toast('กรุณาเลือกคำตอบก่อนกดถัดไป', true);
+      return;
+    }
+
+    const assessment = getGenericAssessment();
+    if (!assessment) return;
+
+    if (genericAssessmentState.currentIndex < assessment.questions.length - 1) {
+      genericAssessmentState.currentIndex += 1;
+      renderGenericAssessmentQuestion();
+      return;
+    }
+
+    finishGenericAssessment();
+  });
+
+  elements.genericAssessmentRetakeButton.addEventListener('click', resetGenericAssessment);
+  elements.genericAssessmentBookingButton.addEventListener(
+    'click',
+    () => goFromGenericAssessmentTo('booking')
+  );
+  elements.genericAssessmentBreathingButton.addEventListener(
+    'click',
+    () => goFromGenericAssessmentTo('breathing')
+  );
+
   elements.refreshAssessmentButton.addEventListener('click', () => state.user ? loadAssessmentHistory() : requireLogin());
+
+  elements.chatbotFloatingButton.addEventListener('click', openChatbotPage);
+  elements.chatbotClearButton.addEventListener('click', resetChatbot);
+  elements.chatbotUrgentButton.addEventListener('click', () => openDialog(elements.urgentDialog));
+  elements.chatbotForm.addEventListener('submit', event => {
+    event.preventDefault();
+    handleChatbotInput(elements.chatbotInput.value);
+  });
+  elements.chatbotInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      elements.chatbotForm.requestSubmit();
+    }
+  });
+  document.addEventListener('click', event => {
+    const promptButton = event.target.closest('[data-chat-prompt]');
+    if (promptButton) {
+      if (state.currentPage !== 'chatbot') openChatbotPage();
+      handleChatbotInput(promptButton.dataset.chatPrompt);
+      return;
+    }
+
+    const actionButton = event.target.closest('[data-chat-action]');
+    if (actionButton) handleChatbotAction(actionButton);
+  });
 
   elements.counselorList.addEventListener('change', event => {
     if (event.target.name === 'counselor') selectCounselor(event.target.value);
@@ -1677,6 +2176,8 @@ async function init() {
   initializeDates();
   renderAssessmentMenu();
   renderFlashcard();
+  resetChatbot();
+  showAppPage('home', { scroll: false });
   await loadCounselors();
   await loadCurrentUser();
 

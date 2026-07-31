@@ -28,6 +28,7 @@
       <a href="#home">หน้าแรก</a>
       <a href="#checkin">เช็กใจ</a>
       <a href="#assessments">แบบประเมิน</a>
+      <a href="#chatbot">คุยกับโอบใจ</a>
       <a href="#booking">จองพูดคุย</a>
       <a href="#breathing">พักใจ</a>
       <a href="#nursing">สำหรับนักศึกษาพยาบาล</a>
@@ -75,7 +76,7 @@
       </div>
     </section>
 
-    <section class="quick-actions section" aria-label="เมนูด่วน">
+    <section class="quick-actions section" id="homeQuickActions" aria-label="เมนูด่วน">
       <article class="quick-card">
         <span class="quick-icon">☁</span>
         <h2>เช็กใจใน 1 นาที</h2>
@@ -93,6 +94,12 @@
         <h2>พักใจ 3 นาที</h2>
         <p>ฝึกหายใจและทำกิจกรรม Grounding เพื่อกลับมาอยู่กับปัจจุบัน</p>
         <a href="#breathing">เริ่มพักใจ →</a>
+      </article>
+      <article class="quick-card chatbot-quick-card">
+        <span class="quick-icon">💬</span>
+        <h2>คุยกับโอบใจ</h2>
+        <p>ผู้ช่วยรับฟังเบื้องต้น แนะนำกิจกรรมดูแลใจ และพาไปยังฟังก์ชันที่เหมาะสม</p>
+        <a href="#chatbot">เริ่มพูดคุย →</a>
       </article>
       <article class="quick-card">
         <span class="quick-icon">✎</span>
@@ -165,21 +172,10 @@
           <p class="eyebrow">Self assessments</p>
           <h2>แบบประเมินสุขภาพใจเบื้องต้น</h2>
         </div>
-        <p>เลือกหัวข้อที่ตรงกับสิ่งที่คุณอยากสำรวจ ใช้เวลาประมาณ 2–3 นาที</p>
+        <p>เลือกหัวข้อที่ตรงกับสิ่งที่คุณอยากสำรวจ แบบประเมินแต่ละชุดจะเปิดเป็นหน้าของตัวเองภายในเว็บไซต์</p>
       </div>
 
-      <div class="assessment-layout">
-        <div class="assessment-menu" id="assessmentMenu"></div>
-        <div class="card assessment-card">
-          <div id="assessmentIntro">
-            <span class="assessment-symbol">♡</span>
-            <h3>เลือกแบบประเมินจากด้านซ้าย</h3>
-            <p>คำถามทั้งหมดเป็นตัวอย่างสำหรับโครงงาน ควรให้ผู้เชี่ยวชาญตรวจสอบก่อนนำไปใช้จริง</p>
-          </div>
-          <form class="hidden" id="assessmentForm"></form>
-          <div class="result-box hidden" id="assessmentResult"></div>
-        </div>
-      </div>
+      <div class="assessment-menu assessment-card-grid" id="assessmentMenu"></div>
 
       <div class="card assessment-history-card">
         <div class="card-heading-row">
@@ -433,6 +429,70 @@
       </div>
     </section>
 
+
+    <section class="section chatbot-page" id="chatbot">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Ob Jai supportive chatbot</p>
+          <h2>คุยกับ “โอบใจ”</h2>
+        </div>
+        <p>ผู้ช่วยรับฟังและแนะนำการดูแลใจเบื้องต้น ไม่ใช่บุคลากรทางการแพทย์และไม่สามารถวินิจฉัยโรคได้</p>
+      </div>
+
+      <div class="chatbot-layout">
+        <aside class="chatbot-about card">
+          <div class="chatbot-avatar large" aria-hidden="true">ใจ</div>
+          <h3>วันนี้อยากให้โอบใจช่วยเรื่องอะไร</h3>
+          <p>คุณพิมพ์เล่าได้ตามสบาย หรือเลือกหัวข้อเริ่มต้นด้านล่าง บทสนทนารุ่นทดลองนี้จะไม่ถูกบันทึกลงฐานข้อมูล</p>
+
+          <div class="chatbot-topic-list" aria-label="หัวข้อเริ่มต้น">
+            <button type="button" data-chat-prompt="ช่วงนี้เครียดจากการเรียน">📚 เครียดจากการเรียน</button>
+            <button type="button" data-chat-prompt="กังวลก่อนสอบหรือ OSCE">📝 กังวลก่อนสอบ</button>
+            <button type="button" data-chat-prompt="เหนื่อยจากการขึ้นฝึก">🩺 เหนื่อยจากการขึ้นฝึก</button>
+            <button type="button" data-chat-prompt="ช่วงนี้นอนไม่ค่อยหลับ">🌙 นอนไม่หลับ</button>
+            <button type="button" data-chat-prompt="รู้สึกหมดไฟและไม่อยากทำอะไร">🪫 รู้สึกหมดไฟ</button>
+            <button type="button" data-chat-prompt="อยากมีคนรับฟัง">🤍 อยากมีคนรับฟัง</button>
+          </div>
+
+          <div class="chatbot-privacy-note">
+            <strong>ความเป็นส่วนตัว</strong>
+            <p>อย่าระบุชื่อผู้ป่วย เลขโรงพยาบาล หรือข้อมูลที่ทำให้ระบุตัวบุคคลได้</p>
+          </div>
+
+          <button class="button danger-outline full" id="chatbotUrgentButton" type="button">ฉันรู้สึกไม่ปลอดภัย</button>
+        </aside>
+
+        <div class="chatbot-shell card">
+          <header class="chatbot-header">
+            <div class="chatbot-identity">
+              <div class="chatbot-avatar" aria-hidden="true">ใจ</div>
+              <div>
+                <strong>โอบใจ</strong>
+                <small id="chatbotStatus">พร้อมรับฟัง</small>
+              </div>
+            </div>
+            <button class="text-button" id="chatbotClearButton" type="button">เริ่มบทสนทนาใหม่</button>
+          </header>
+
+          <div class="chatbot-messages" id="chatbotMessages" role="log" aria-live="polite" aria-label="บทสนทนากับโอบใจ"></div>
+
+          <div class="chatbot-quick-replies" id="chatbotQuickReplies" aria-label="ข้อความแนะนำ">
+            <button type="button" data-chat-prompt="ช่วยฉันฝึกหายใจหน่อย">ฝึกหายใจ</button>
+            <button type="button" data-chat-prompt="ฉันควรทำแบบประเมินอะไร">เลือกแบบประเมิน</button>
+            <button type="button" data-chat-prompt="อยากจองคุยกับผู้ให้คำปรึกษา">จองผู้ให้คำปรึกษา</button>
+            <button type="button" data-chat-prompt="อยากเขียนระบาย">เขียนระบาย</button>
+          </div>
+
+          <form class="chatbot-form" id="chatbotForm">
+            <label class="sr-only" for="chatbotInput">พิมพ์ข้อความถึงโอบใจ</label>
+            <textarea id="chatbotInput" rows="2" maxlength="1000" placeholder="พิมพ์สิ่งที่กำลังรู้สึก..." required></textarea>
+            <button class="chatbot-send-button" id="chatbotSendButton" type="submit" aria-label="ส่งข้อความ">ส่ง</button>
+          </form>
+          <p class="chatbot-disclaimer">โอบใจให้คำแนะนำเบื้องต้นเท่านั้น หากมีเหตุฉุกเฉิน โปรดโทร 1323 หรือ 1669</p>
+        </div>
+      </div>
+    </section>
+
     <section class="section hidden" id="staffPanel">
       <div class="section-heading">
         <div>
@@ -470,9 +530,15 @@
       <h2>เมนู</h2>
       <a href="#booking">จองพูดคุย</a>
       <a href="#assessments">แบบประเมิน</a>
+      <a href="#chatbot">คุยกับโอบใจ</a>
       <a href="#breathing">ห้องพักใจ</a>
     </div>
   </footer>
+
+  <button class="chatbot-floating-button" id="chatbotFloatingButton" type="button" aria-label="เปิดแชตกับโอบใจ">
+    <span aria-hidden="true">💬</span>
+    <strong>คุยกับโอบใจ</strong>
+  </button>
 
 
   <!-- แบบประเมินความเครียด SPST-20: เปิดเป็นหน้าซ้อนในเว็บเดิม ไม่เปลี่ยน URL -->
@@ -573,6 +639,99 @@
                 ไปที่ห้องพักใจ
               </button>
               <button class="spst-action spst-action-light" id="spstRetakeButton" type="button">
+                ทำแบบประเมินใหม่
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </dialog>
+
+  <dialog class="spst-dialog" id="genericAssessmentDialog" aria-labelledby="genericAssessmentTitle">
+    <div class="spst-dialog-shell">
+      <header class="spst-dialog-header">
+        <a class="spst-dialog-brand" href="#home" aria-label="ห้องโอบรัก หน้าแรก">
+          <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" />
+          <span>
+            <strong>ห้องโอบรัก</strong>
+            <small>Ob Rak Mental Health Space</small>
+          </span>
+        </a>
+        <button class="spst-close-button" id="genericAssessmentCloseButton" type="button">
+          ← กลับไปหน้าแบบประเมิน
+        </button>
+      </header>
+
+      <main class="spst-dialog-content">
+        <aside class="spst-info-card">
+          <p class="spst-kicker" id="genericAssessmentKicker">แบบประเมินสุขภาพใจ</p>
+          <h2 id="genericAssessmentTitle">แบบประเมิน</h2>
+          <span class="spst-badge" id="genericAssessmentBadge">SELF CHECK</span>
+          <p id="genericAssessmentDescription"></p>
+
+          <div class="spst-help-box">
+            <strong>วิธีตอบ</strong>
+            <p id="genericAssessmentInstruction">
+              เลือกคำตอบที่ใกล้เคียงกับความรู้สึกของคุณมากที่สุด
+            </p>
+          </div>
+
+          <details class="spst-score-guide" open>
+            <summary>ดูความหมายของคะแนน</summary>
+            <ul id="genericAssessmentScale"></ul>
+          </details>
+
+          <p class="spst-disclaimer">
+            ผลประเมินเป็นการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัยโรค
+          </p>
+        </aside>
+
+        <section class="spst-assessment-card">
+          <div id="genericAssessmentQuestionView">
+            <div class="spst-progress-row">
+              <strong id="genericAssessmentProgressText">ข้อที่ 1</strong>
+              <span id="genericAssessmentAnsweredText">ตอบแล้ว 0 ข้อ</span>
+            </div>
+
+            <div class="spst-progress-track" aria-hidden="true">
+              <div class="spst-progress-fill" id="genericAssessmentProgressFill"></div>
+            </div>
+
+            <article class="spst-question-box">
+              <span class="spst-question-chip" id="genericAssessmentQuestionNumber">ข้อ 1</span>
+              <h3 id="genericAssessmentQuestionText"></h3>
+              <div class="spst-answer-list" id="genericAssessmentAnswerList"></div>
+            </article>
+
+            <div class="spst-nav-row">
+              <button class="spst-action spst-action-light" id="genericAssessmentPreviousButton" type="button">
+                ก่อนหน้า
+              </button>
+              <button class="spst-action spst-action-primary" id="genericAssessmentNextButton" type="button">
+                ถัดไป
+              </button>
+            </div>
+          </div>
+
+          <div class="spst-result-view hidden" id="genericAssessmentResultView">
+            <div class="spst-result-symbol">♡</div>
+            <p class="spst-kicker">ผลประเมินของคุณ</p>
+            <h3 id="genericAssessmentResultLevel">ผลการประเมิน</h3>
+            <p class="spst-total-score">
+              คะแนนรวม <strong id="genericAssessmentResultScore">0</strong><span id="genericAssessmentResultMax">/0</span>
+            </p>
+            <p class="spst-result-advice" id="genericAssessmentResultAdvice"></p>
+            <p class="spst-save-message" id="genericAssessmentSaveMessage" role="status"></p>
+
+            <div class="spst-result-actions">
+              <button class="spst-action spst-action-primary" id="genericAssessmentBookingButton" type="button">
+                จองเวลาพูดคุย
+              </button>
+              <button class="spst-action spst-action-light" id="genericAssessmentBreathingButton" type="button">
+                ไปที่ห้องพักใจ
+              </button>
+              <button class="spst-action spst-action-light" id="genericAssessmentRetakeButton" type="button">
                 ทำแบบประเมินใหม่
               </button>
             </div>
