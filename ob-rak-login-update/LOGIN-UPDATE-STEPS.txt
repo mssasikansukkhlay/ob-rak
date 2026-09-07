@@ -1,0 +1,30 @@
+อัปเดตระบบ LOGIN ห้องโอบรัก
+
+สิ่งที่เปลี่ยน
+- Login ใช้ USER ID + Password
+- USER ID ห้ามซ้ำ และตรวจสอบแบบทันทีตอนสมัคร
+- USERNAME เป็นชื่อแสดงผลและซ้ำกันได้
+- เพิ่มสถานะ นักศึกษา / เจ้าหน้าที่
+- เพิ่มอายุ
+- UI Login/Register ใช้โทน Powder Blue + Cream + Cocoa แบบน่ารัก ปุ่มหนา/กรอบชัด ตาม moodboard ที่ให้มา
+- ผู้สมัครเลือก “เจ้าหน้าที่” ได้ใน account_status แต่จะไม่ได้สิทธิ์ admin/counselor อัตโนมัติ เพื่อความปลอดภัย
+
+ต้องทำใน Supabase ก่อนทดสอบ
+1) Supabase Dashboard > SQL Editor > New query
+2) เปิดไฟล์ supabase/login-userid-migration.sql
+3) Copy ทั้งหมดไปวาง แล้วกด Run
+4) ไปที่ Authentication > Providers > Email
+5) ปิด Confirm email (สำคัญ) เพราะเวอร์ชันนี้ใช้ USER ID เป็น credential และสร้างอีเมลภายในระบบอัตโนมัติ
+
+จากนั้นใน VS Code
+1) แทนไฟล์ index.html, src/app.js, src/styles.css ด้วยไฟล์ในชุดนี้
+2) เปิด Terminal
+3) npm run dev
+4) เปิด http://localhost:5173
+
+หมายเหตุบัญชีเก่า
+บัญชีทดสอบที่สมัครด้วยระบบ Email/Password เดิมจะยังใช้รูปแบบ credential เดิม จึงไม่สามารถ Login ด้วย USER ID แบบใหม่ได้โดยตรง
+ถ้ายังอยู่ในช่วงพัฒนา แนะนำลบบัญชีทดสอบเก่าใน Supabase Authentication > Users แล้วสมัครใหม่ด้วยหน้า Register เวอร์ชันนี้
+
+ลืมรหัสผ่าน
+เวอร์ชันนี้ยังไม่ทำ self-service password reset เพราะไม่ได้ใช้อีเมลจริงเป็นชื่อ Login ปุ่ม “ลืมรหัสผ่าน?” จะแจ้งให้ติดต่อผู้ดูแลระบบก่อน
