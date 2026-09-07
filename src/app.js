@@ -63,6 +63,11 @@ const elements = {
   registerForm: $('#registerForm'),
   loginMessage: $('#loginMessage'),
   registerMessage: $('#registerMessage'),
+  registerUserId: $('#registerUserId'),
+  userIdAvailability: $('#userIdAvailability'),
+  forgotPasswordButton: $('#forgotPasswordButton'),
+  openRegisterFromLogin: $('#openRegisterFromLogin'),
+  openLoginFromRegister: $('#openLoginFromRegister'),
   moodForm: $('#moodForm'),
   stressRange: $('#stressRange'),
   stressValue: $('#stressValue'),
@@ -419,6 +424,53 @@ function showAppPage(pageId = 'home', options = {}) {
   }
 }
 
+function normalizeUserId(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isValidUserId(value) {
+  return /^[a-z0-9._-]{3,30}$/i.test(String(value || '').trim());
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+
+let userIdAvailabilityTimer = null;
+
+function setUserIdAvailability(message = '', type = '') {
+  if (!elements.userIdAvailability) return;
+  elements.userIdAvailability.textContent = message;
+  elements.userIdAvailability.classList.remove('is-available', 'is-unavailable', 'is-checking');
+  if (type) elements.userIdAvailability.classList.add(`is-${type}`);
+}
+
+async function checkUserIdAvailability(rawUserId, { silentEmpty = true } = {}) {
+  const userId = normalizeUserId(rawUserId);
+  if (!userId) {
+    if (!silentEmpty) setUserIdAvailability('กรุณากรอก USER ID', 'unavailable');
+    else setUserIdAvailability();
+    return false;
+  }
+  if (!isValidUserId(userId)) {
+    setUserIdAvailability('ใช้ได้เฉพาะ A–Z, 0–9, จุด, _ หรือ - จำนวน 3–30 ตัว', 'unavailable');
+    return false;
+  }
+
+  setUserIdAvailability('กำลังตรวจสอบ USER ID...', 'checking');
+  const { data, error } = await supabase.rpc('is_user_id_available', { p_user_id: userId });
+  if (error) {
+    setUserIdAvailability('ตรวจสอบ USER ID ไม่สำเร็จ กรุณารัน schema.sql เวอร์ชันล่าสุด', 'unavailable');
+    return false;
+  }
+  if (data === true) {
+    setUserIdAvailability('✓ USER ID นี้ใช้งานได้', 'available');
+    return true;
+  }
+  setUserIdAvailability('USER ID นี้ถูกใช้แล้ว กรุณาเลือกใหม่', 'unavailable');
+  return false;
+}
+
 async function fetchProfile(authUser = null) {
   let user = authUser;
   if (!user) {
@@ -429,7 +481,7 @@ async function fetchProfile(authUser = null) {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, student_id, name, email, role, created_at')
+    .select('id, student_id, username, name, email, account_status, age, role, created_at')
     .eq('id', user.id)
     .single();
 
@@ -438,8 +490,11 @@ async function fetchProfile(authUser = null) {
     id: profile.id,
     studentId: profile.student_id,
     student_id: profile.student_id,
-    name: profile.name,
+    username: profile.username || profile.name,
+    name: profile.username || profile.name,
     email: profile.email || user.email || '',
+    accountStatus: profile.account_status || 'student',
+    age: profile.age ?? null,
     role: profile.role,
     createdAt: profile.created_at
   };
@@ -458,10 +513,10 @@ function fromSupabaseError(error, fallback = 'เกิดข้อผิดพ�
 
   if (error?.code === '23505') message = 'ข้อมูลนี้ถูกใช้แล้ว หรือช่วงเวลานี้มีผู้จองแล้ว';
   if (error?.code === '42501' || raw.toLowerCase().includes('row-level security')) message = 'คุณไม่มีสิทธิ์ทำรายการนี้';
-  if (raw.toLowerCase().includes('invalid login credentials')) message = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+  if (raw.toLowerCase().includes('invalid login credentials')) message = 'USER ID หรือรหัสผ่านไม่ถูกต้อง';
   if (raw.toLowerCase().includes('email not confirmed')) message = 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ';
-  if (raw.toLowerCase().includes('user already registered')) message = 'อีเมลนี้ถูกสมัครไว้แล้ว';
-  if (raw.includes('duplicate key') && raw.includes('student_id')) message = 'รหัสนักศึกษานี้ถูกใช้แล้ว';
+  if (raw.toLowerCase().includes('user already registered')) message = 'อีเมลนี้มีบัญชีอยู่แล้ว กรุณาใช้อีเมลอื่นหรือกดลืมรหัสผ่าน';
+  if (raw.includes('duplicate key') && raw.includes('student_id')) message = 'USER ID นี้ถูกใช้แล้ว กรุณาเลือก USER ID อื่น';
 
   return makeAppError(message, 400, { code: error?.code });
 }
@@ -502,13 +557,32 @@ async function api(path, options = {}) {
 
   try {
     if (method === 'POST' && pathname === '/api/auth/register') {
-      const studentId = String(body.studentId || '').trim();
-      const name = String(body.name || '').trim();
+      const userId = normalizeUserId(body.userId);
+      const username = String(body.username || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
       const password = String(body.password || '');
-      if (!studentId || !name || !email || password.length < 8 || !body.consent) {
+      const accountStatus = String(body.accountStatus || 'student');
+      const age = Number(body.age);
+
+      if (!userId || !username || !email || password.length < 8 || !body.consent) {
         throw makeAppError('กรอกข้อมูลให้ครบ รหัสผ่านอย่างน้อย 8 ตัว และยอมรับเงื่อนไขความเป็นส่วนตัว');
       }
+      if (!isValidEmail(email)) {
+        throw makeAppError('กรุณากรอกอีเมลให้ถูกต้อง');
+      }
+      if (!isValidUserId(userId)) {
+        throw makeAppError('USER ID ใช้ได้เฉพาะ A–Z, 0–9, จุด, _ หรือ - จำนวน 3–30 ตัว');
+      }
+      if (!['student', 'staff'].includes(accountStatus)) {
+        throw makeAppError('กรุณาเลือกสถานะผู้ใช้งาน');
+      }
+      if (!Number.isInteger(age) || age < 15 || age > 100) {
+        throw makeAppError('กรุณากรอกอายุระหว่าง 15–100 ปี');
+      }
+
+      const { data: available, error: availabilityError } = await supabase.rpc('is_user_id_available', { p_user_id: userId });
+      if (availabilityError) throw fromSupabaseError(availabilityError, 'ตรวจสอบ USER ID ไม่สำเร็จ');
+      if (available !== true) throw makeAppError('USER ID นี้ถูกใช้แล้ว กรุณาเลือก USER ID อื่น');
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -516,8 +590,11 @@ async function api(path, options = {}) {
         options: {
           emailRedirectTo: window.location.origin,
           data: {
-            student_id: studentId,
-            name,
+            student_id: userId,
+            username,
+            name: username,
+            account_status: accountStatus,
+            age,
             consent_privacy: true
           }
         }
@@ -530,15 +607,28 @@ async function api(path, options = {}) {
           user: await fetchProfile(data.user)
         };
       }
-      return { message: 'สมัครสมาชิกสำเร็จ กรุณาเปิดอีเมลเพื่อยืนยันบัญชีก่อนเข้าสู่ระบบ' };
+      return {
+        message: 'สมัครสมาชิกสำเร็จ กรุณาเปิดอีเมลเพื่อยืนยันบัญชีก่อนเข้าสู่ระบบ'
+      };
     }
 
     if (method === 'POST' && pathname === '/api/auth/login') {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: String(body.email || '').trim().toLowerCase(),
-        password: String(body.password || '')
+      const userId = normalizeUserId(body.userId);
+      if (!isValidUserId(userId)) throw makeAppError('กรุณากรอก USER ID ให้ถูกต้อง');
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, password: String(body.password || '') })
       });
-      if (error) throw fromSupabaseError(error, 'เข้าสู่ระบบไม่สำเร็จ');
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw makeAppError(result.message || 'USER ID หรือรหัสผ่านไม่ถูกต้อง', response.status);
+
+      const { data, error } = await supabase.auth.setSession({
+        access_token: result.access_token,
+        refresh_token: result.refresh_token
+      });
+      if (error || !data.user) throw fromSupabaseError(error, 'เข้าสู่ระบบไม่สำเร็จ');
       const user = await fetchProfile(data.user);
       return { token: data.session?.access_token || '', user };
     }
@@ -857,7 +947,7 @@ async function handleLogin(event) {
   try {
     const data = await api('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: formData.get('email'), password: formData.get('password') })
+      body: JSON.stringify({ userId: formData.get('userId'), password: formData.get('password') })
     });
     saveAuth(data.token, data.user);
     elements.loginForm.reset();
@@ -877,14 +967,17 @@ async function handleRegister(event) {
     const data = await api('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({
-        studentId: formData.get('studentId'),
-        name: formData.get('name'),
+        userId: formData.get('userId'),
+        username: formData.get('username'),
         email: formData.get('email'),
         password: formData.get('password'),
+        accountStatus: formData.get('accountStatus'),
+        age: formData.get('age'),
         consent: formData.get('consent') === 'on'
       })
     });
     elements.registerForm.reset();
+    setUserIdAvailability();
     setMessage(elements.registerMessage);
     closeDialog(elements.registerDialog);
     if (data.user) {
@@ -1964,6 +2057,47 @@ function bindEvents() {
   elements.loginForm.addEventListener('submit', handleLogin);
   elements.registerForm.addEventListener('submit', handleRegister);
 
+  elements.registerUserId?.addEventListener('input', event => {
+    clearTimeout(userIdAvailabilityTimer);
+    const value = event.target.value;
+    if (!value.trim()) {
+      setUserIdAvailability();
+      return;
+    }
+    setUserIdAvailability('รอตรวจสอบ...', 'checking');
+    userIdAvailabilityTimer = setTimeout(() => checkUserIdAvailability(value), 450);
+  });
+  elements.registerUserId?.addEventListener('blur', event => {
+    clearTimeout(userIdAvailabilityTimer);
+    checkUserIdAvailability(event.target.value, { silentEmpty: false });
+  });
+
+  elements.openRegisterFromLogin?.addEventListener('click', () => {
+    closeDialog(elements.loginDialog);
+    openDialog(elements.registerDialog);
+  });
+  elements.openLoginFromRegister?.addEventListener('click', () => {
+    closeDialog(elements.registerDialog);
+    openDialog(elements.loginDialog);
+  });
+  elements.forgotPasswordButton?.addEventListener('click', async () => {
+    const email = window.prompt('กรอกอีเมลที่ใช้สมัครสมาชิก');
+    if (!email) return;
+    if (!isValidEmail(email)) {
+      setMessage(elements.loginMessage, 'กรุณากรอกอีเมลให้ถูกต้อง', true);
+      return;
+    }
+    setMessage(elements.loginMessage, 'กำลังส่งลิงก์ตั้งรหัสผ่านใหม่...');
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}${window.location.pathname}`
+    });
+    if (error) {
+      setMessage(elements.loginMessage, fromSupabaseError(error, 'ส่งลิงก์ไม่สำเร็จ').message, true);
+      return;
+    }
+    setMessage(elements.loginMessage, 'ส่งลิงก์ตั้งรหัสผ่านใหม่แล้ว กรุณาตรวจอีเมลของคุณ');
+  });
+
   document.addEventListener('click', event => {
     const closeButton = event.target.closest('[data-close-dialog]');
     if (closeButton) closeDialog(document.getElementById(closeButton.dataset.closeDialog));
@@ -2185,6 +2319,20 @@ async function init() {
     state.token = session?.access_token || '';
     if (event === 'SIGNED_OUT') {
       clearAuth(false);
+      return;
+    }
+    if (event === 'PASSWORD_RECOVERY' && session) {
+      window.setTimeout(async () => {
+        const newPassword = window.prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 8 ตัวอักษร)');
+        if (!newPassword) return;
+        if (newPassword.length < 8) {
+          toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร', true);
+          return;
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) toast(fromSupabaseError(error, 'เปลี่ยนรหัสผ่านไม่สำเร็จ').message, true);
+        else toast('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
+      }, 300);
       return;
     }
     if (['SIGNED_IN', 'USER_UPDATED'].includes(event) && session) {

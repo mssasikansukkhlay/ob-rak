@@ -741,48 +741,100 @@
     </div>
   </dialog>
 
-  <dialog class="modal" id="loginDialog">
-    <form method="dialog" class="modal-shell" id="loginForm">
-      <button class="modal-close" type="button" data-close-dialog="loginDialog" aria-label="ปิด">×</button>
-      <div class="modal-heading">
-        <span>♡</span>
-        <h2>เข้าสู่ห้องโอบรัก</h2>
-        <p>เข้าสู่ระบบเพื่อบันทึกข้อมูลและจัดการนัดหมาย</p>
+  <dialog class="modal auth-modal" id="loginDialog">
+    <form method="dialog" class="modal-shell auth-shell auth-login-shell" id="loginForm">
+      <div class="auth-stripe-panel" aria-hidden="true">
+        <span class="auth-doodle auth-doodle-heart">♡</span>
+        <span class="auth-doodle auth-doodle-star">✦</span>
+        <span class="auth-doodle auth-doodle-dot">•</span>
       </div>
-      <label>
-        <span>อีเมล</span>
-        <input name="email" type="email" autocomplete="email" required placeholder="student@example.com" />
+      <button class="modal-close auth-close" type="button" data-close-dialog="loginDialog" aria-label="ปิด">×</button>
+      <div class="auth-brand">
+        <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" />
+        <div>
+          <small>OB RAK MENTAL HEALTH SPACE</small>
+          <strong>ห้องโอบรัก</strong>
+        </div>
+      </div>
+      <div class="auth-heading">
+        <p class="auth-kicker">WELCOME BACK</p>
+        <h2>เข้าสู่ระบบห้องโอบรัก</h2>
+        <p>ใช้ USER ID และรหัสผ่านของคุณ</p>
+      </div>
+      <label class="auth-field">
+        <span>USER ID</span>
+        <input name="userId" type="text" autocomplete="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]{3,30}" title="ใช้ได้เฉพาะ A-Z, 0-9, จุด, ขีดล่าง หรือขีดกลาง จำนวน 3-30 ตัว" placeholder="เช่น 6712345678" />
       </label>
-      <label>
-        <span>รหัสผ่าน</span>
-        <input name="password" type="password" autocomplete="current-password" required />
+      <label class="auth-field">
+        <span>PASSWORD</span>
+        <input name="password" type="password" autocomplete="current-password" required placeholder="••••••••" />
       </label>
-      <button class="button primary full" type="submit">เข้าสู่ระบบ</button>
-      <p class="form-message" id="loginMessage" role="status"></p>
-      <div class="demo-login">
-        <strong>เริ่มใช้งานครั้งแรก</strong>
-        <span>สมัครบัญชีจากหน้าเว็บก่อน แล้วกำหนดสิทธิ์ผู้ดูแลหรือผู้ให้คำปรึกษาผ่าน Supabase SQL Editor</span>
+      <button class="auth-submit" type="submit">เข้าสู่ระบบ</button>
+      <p class="form-message auth-message" id="loginMessage" role="status"></p>
+      <div class="auth-links">
+        <button class="auth-text-link" id="forgotPasswordButton" type="button">ลืมรหัสผ่าน?</button>
+        <span aria-hidden="true">•</span>
+        <button class="auth-text-link" id="openRegisterFromLogin" type="button">สมัครสมาชิก</button>
       </div>
     </form>
   </dialog>
 
-  <dialog class="modal" id="registerDialog">
-    <form method="dialog" class="modal-shell" id="registerForm">
-      <button class="modal-close" type="button" data-close-dialog="registerDialog" aria-label="ปิด">×</button>
-      <div class="modal-heading">
-        <span>♡</span>
-        <h2>สมัครสมาชิกนักศึกษา</h2>
-        <p>ใช้ข้อมูลตัวอย่างเท่านั้นในช่วงพัฒนาโครงงาน</p>
+  <dialog class="modal auth-modal auth-register-modal" id="registerDialog">
+    <form method="dialog" class="modal-shell auth-shell auth-register-shell" id="registerForm">
+      <div class="auth-stripe-panel" aria-hidden="true">
+        <span class="auth-doodle auth-doodle-heart">♡</span>
+        <span class="auth-doodle auth-doodle-star">✦</span>
+        <span class="auth-doodle auth-doodle-dot">•</span>
       </div>
-      <div class="form-grid">
-        <label><span>รหัสนักศึกษา</span><input name="studentId" required maxlength="30" /></label>
-        <label><span>ชื่อที่ต้องการให้เรียก</span><input name="name" required maxlength="120" /></label>
+      <button class="modal-close auth-close" type="button" data-close-dialog="registerDialog" aria-label="ปิด">×</button>
+      <div class="auth-brand">
+        <img src="/rmutt-nursing-logo.png" alt="ตราคณะพยาบาลศาสตร์ มทร.ธัญบุรี" />
+        <div>
+          <small>CREATE YOUR SPACE</small>
+          <strong>สมัครสมาชิกผู้ใช้</strong>
+        </div>
       </div>
-      <label><span>อีเมล</span><input name="email" type="email" required autocomplete="email" /></label>
-      <label><span>รหัสผ่านอย่างน้อย 8 ตัว</span><input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
-      <label class="consent-row"><input name="consent" type="checkbox" required /><span>ฉันยอมรับว่าระบบนี้เป็นต้นแบบและยินยอมให้เก็บข้อมูลเพื่อสาธิตการทำงาน</span></label>
-      <button class="button primary full" type="submit">สร้างบัญชี</button>
-      <p class="form-message" id="registerMessage" role="status"></p>
+      <div class="auth-heading auth-heading-left">
+        <p class="auth-kicker">NEW MEMBER</p>
+        <h2>สร้างบัญชีห้องโอบรัก</h2>
+        <p>USER ID ต้องไม่ซ้ำ ส่วน USERNAME สามารถใช้ชื่อซ้ำกันได้ และ EMAIL ใช้สำหรับยืนยันบัญชี/กู้รหัสผ่าน</p>
+      </div>
+      <div class="auth-form-grid">
+        <label class="auth-field">
+          <span>USERNAME <small>ชื่อที่ต้องการให้เรียก — ซ้ำได้</small></span>
+          <input name="username" type="text" required maxlength="120" autocomplete="name" placeholder="เช่น มายด์" />
+        </label>
+        <label class="auth-field">
+          <span>USER ID <small>ห้ามซ้ำ</small></span>
+          <input id="registerUserId" name="userId" type="text" required minlength="3" maxlength="30" pattern="[A-Za-z0-9._-]{3,30}" title="ใช้ได้เฉพาะ A-Z, 0-9, จุด, ขีดล่าง หรือขีดกลาง จำนวน 3-30 ตัว" autocomplete="username" placeholder="เช่น 6712345678" aria-describedby="userIdAvailability" />
+          <small class="auth-availability" id="userIdAvailability" aria-live="polite"></small>
+        </label>
+        <label class="auth-field">
+          <span>EMAIL <small>ใช้ยืนยันบัญชีและกู้รหัสผ่าน</small></span>
+          <input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="name@example.com" />
+        </label>
+        <label class="auth-field">
+          <span>PASSWORD <small>อย่างน้อย 8 ตัวอักษร</small></span>
+          <input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="ตั้งรหัสผ่าน" />
+        </label>
+        <label class="auth-field">
+          <span>สถานะ</span>
+          <select name="accountStatus" required>
+            <option value="student">นักศึกษา</option>
+            <option value="staff">เจ้าหน้าที่</option>
+          </select>
+        </label>
+        <label class="auth-field">
+          <span>อายุ</span>
+          <input name="age" type="number" required min="15" max="100" inputmode="numeric" placeholder="เช่น 20" />
+        </label>
+      </div>
+      <label class="consent-row auth-consent"><input name="consent" type="checkbox" required /><span>ฉันยินยอมให้ระบบต้นแบบเก็บข้อมูลบัญชีเพื่อสาธิตการทำงาน</span></label>
+      <button class="auth-submit" type="submit">สมัครสมาชิกผู้ใช้</button>
+      <p class="form-message auth-message" id="registerMessage" role="status"></p>
+      <div class="auth-links auth-links-single">
+        <button class="auth-text-link" id="openLoginFromRegister" type="button">มีบัญชีแล้ว? เข้าสู่ระบบ</button>
+      </div>
     </form>
   </dialog>
 
